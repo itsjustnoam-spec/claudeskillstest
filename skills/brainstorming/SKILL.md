@@ -124,7 +124,7 @@ your path and complete them in order.
 2. **Ask clarifying questions** — one at a time, the ones that matter
 3. **Present short design in chat** — approach, files touched, testing
 4. **Get approval** — STOP and wait for an explicit yes; presenting the design and starting in the same breath is skipping the gate
-5. **Implement** — proceed with the normal development workflow (TDD applies); no plan document
+5. **Implement** — proceed with the normal development workflow; no plan document
 
 **Architectural:**
 1. **Explore project context** — check files, docs, recent commits

@@ -14,11 +14,11 @@ and a fresh reviewer on every task, each re-reading the codebase from zero.
 Inline execution pays for one context (yours) plus one reviewer at the end.
 What it gives up is a fresh context per task and a second pair of eyes per
 task. This skill keeps what those two things bought, by other means: the
-brief is the spec, the ledger is your memory, TDD is the per-task gate, and
+brief is the spec, the ledger is your memory, automated testing is the per-task gate, and
 the final reviewer is the second pair of eyes.
 
 **Core principle:** The plan already did the thinking. Execute it exactly,
-prove each step with a test you watched fail and then pass, and leave a
+prove each step with automated tests and verification, and leave a
 record that survives your own forgetting.
 
 **Narration:** between tool calls, narrate at most one short line — the
@@ -69,7 +69,7 @@ digraph process {
     subgraph cluster_per_task {
         label="Per Task";
         "task-start: brief + BASE; read the brief" [shape=box];
-        "Work the steps in order: TDD, run every verification, read every output" [shape=box];
+        "Work the steps in order: run every verification, read every output" [shape=box];
         "Step output matches plan's Expected?" [shape=diamond];
         "Plan wrong? Rule and ledger. Code wrong? systematic-debugging" [shape=box];
         "Commit as the plan's commit steps say" [shape=box];
@@ -80,24 +80,24 @@ digraph process {
     "Setup: worktree, workspace + ledger, read plan + spec, pre-flight scan" [shape=box];
     "More tasks remain?" [shape=diamond];
     "Final whole-branch review (fresh reviewer if you have one)" [shape=box];
-    "Re-grade, then: Critical/Important → ONE fix pass, each fix RED→GREEN + green suite; Minor → ledger" [shape=box];
+    "Re-grade, then: Critical/Important → ONE fix pass, each fix verified + green suite; Minor → ledger" [shape=box];
     "Final review clean: delete this plan's workspace" [shape=box];
     "Use superpowers:finishing-a-development-branch" [shape=box style=filled fillcolor=lightgreen];
 
     "Setup: worktree, workspace + ledger, read plan + spec, pre-flight scan" -> "task-start: brief + BASE; read the brief";
-    "task-start: brief + BASE; read the brief" -> "Work the steps in order: TDD, run every verification, read every output";
-    "Work the steps in order: TDD, run every verification, read every output" -> "Step output matches plan's Expected?";
+    "task-start: brief + BASE; read the brief" -> "Work the steps in order: run every verification, read every output";
+    "Work the steps in order: run every verification, read every output" -> "Step output matches plan's Expected?";
     "Step output matches plan's Expected?" -> "Plan wrong? Rule and ledger. Code wrong? systematic-debugging" [label="no"];
-    "Plan wrong? Rule and ledger. Code wrong? systematic-debugging" -> "Work the steps in order: TDD, run every verification, read every output";
+    "Plan wrong? Rule and ledger. Code wrong? systematic-debugging" -> "Work the steps in order: run every verification, read every output";
     "Step output matches plan's Expected?" -> "Commit as the plan's commit steps say" [label="yes, last step"];
     "Commit as the plan's commit steps say" -> "Completion contract met?";
-    "Completion contract met?" -> "Work the steps in order: TDD, run every verification, read every output" [label="no - finish the task"];
+    "Completion contract met?" -> "Work the steps in order: run every verification, read every output" [label="no - finish the task"];
     "Completion contract met?" -> "task-done: run tests, ledger the result; mark todo complete" [label="yes"];
     "task-done: run tests, ledger the result; mark todo complete" -> "More tasks remain?";
     "More tasks remain?" -> "task-start: brief + BASE; read the brief" [label="yes"];
     "More tasks remain?" -> "Final whole-branch review (fresh reviewer if you have one)" [label="no"];
-    "Final whole-branch review (fresh reviewer if you have one)" -> "Re-grade, then: Critical/Important → ONE fix pass, each fix RED→GREEN + green suite; Minor → ledger";
-    "Re-grade, then: Critical/Important → ONE fix pass, each fix RED→GREEN + green suite; Minor → ledger" -> "Final review clean: delete this plan's workspace";
+    "Final whole-branch review (fresh reviewer if you have one)" -> "Re-grade, then: Critical/Important → ONE fix pass, each fix verified + green suite; Minor → ledger";
+    "Re-grade, then: Critical/Important → ONE fix pass, each fix verified + green suite; Minor → ledger" -> "Final review clean: delete this plan's workspace";
     "Final review clean: delete this plan's workspace" -> "Use superpowers:finishing-a-development-branch";
 }
 ```
@@ -143,11 +143,6 @@ authority the plan argues from, and conflicts inside the plan resolve
 against it. A plan with no reachable spec gets a ledger note saying so —
 rulings made without one are provisional.
 
-**REQUIRED SUB-SKILL:** load superpowers:test-driven-development now,
-before Task 1. It governs every step of every task below; a plan whose
-steps already say "write the failing test first" does not exempt you
-from reading it.
-
 Before Task 1, scan the plan for conflicts between tasks. The plan's
 Interfaces blocks tell you where to look: for every task that consumes
 what an earlier task produces, one ledger row — the two tasks, what one
@@ -179,11 +174,7 @@ never in a call of its own.
 
 ### 2. Work the steps
 
-The plan's steps are already in RED-GREEN order; follow them in that
-order under superpowers:test-driven-development, loaded at setup. A test
-step's code is written first and run first. Watching it fail is a step,
-not a formality — a test that passes before the implementation exists is
-a finding about the test.
+Follow the plan's steps in order. Run each verification step and ensure all tests pass.
 
 Every step that runs a command has an `Expected:` line. Run the command,
 read its output, and compare. Three outcomes:
@@ -270,11 +261,10 @@ because the spec was silent has graded the spec, not the effect. Then:
   conflict, not a note that you declined a polish suggestion.
 
 Fix the Critical and Important findings yourself — you are the
-implementer here — in ONE pass. Each fix is verified by TDD, not by a
-second reviewer: write the test that reproduces the finding, watch it
-fail, make it pass, then run the whole suite. Record each in the ledger as
-`Final: fixed <finding> — <test name> RED→GREEN, suite <N>/<N>`. A fix
-without a test that failed first is not verified; a suite that is not
+implementer here — in ONE pass. Each fix is verified with tests, not by a
+second reviewer: add or update tests covering the finding, verify they
+pass, then run the whole suite. Record each in the ledger as
+`Final: fixed <finding> — suite <N>/<N>`. A suite that is not
 green after the pass means the pass is not over. Do not dispatch a
 re-review: it would re-read a diff whose covering tests already answer
 "addressed" and whose suite run already answers "broke nothing".

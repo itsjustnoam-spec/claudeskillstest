@@ -7,17 +7,15 @@ description: Use when creating new skills, editing existing skills, or verifying
 
 ## Overview
 
-**Writing skills IS Test-Driven Development applied to process documentation.**
+**Writing skills requires empirical testing applied to process documentation.**
 
 **Personal skills live in your runtime's skills directory** (`~/.claude/skills/` on Claude Code).
 
-You write test cases (pressure scenarios with subagents), watch them fail (baseline behavior), write the skill (documentation), watch tests pass (agents comply), and refactor (close loopholes).
+You write test cases (pressure scenarios with subagents), observe baseline behavior (without the skill), write the skill (documentation), verify agents comply (with the skill), and refine (close loopholes).
 
 **Core principle:** If you didn't watch an agent fail without the skill, you don't know if the skill teaches the right thing.
 
-**REQUIRED BACKGROUND:** You MUST understand superpowers:test-driven-development before using this skill. That skill defines the fundamental RED-GREEN-REFACTOR cycle. This skill adapts TDD to documentation.
-
-**Official guidance:** For Anthropic's official skill authoring best practices, see anthropic-best-practices.md. This document provides additional patterns and guidelines that complement the TDD-focused approach in this skill.
+**Official guidance:** For Anthropic's official skill authoring best practices, see anthropic-best-practices.md. This document provides additional patterns and guidelines that complement the empirical testing approach in this skill.
 
 ## What is a Skill?
 
@@ -27,22 +25,22 @@ A **skill** is a reference guide for proven techniques, patterns, or tools. Skil
 
 **Skills are NOT:** Narratives about how you solved a problem once
 
-## TDD Mapping for Skills
+## Testing Process for Skills
 
-| TDD Concept | Skill Creation |
-|-------------|----------------|
+| Testing Concept | Skill Creation |
+|-----------------|----------------|
 | **Test case** | Pressure scenario with subagent |
-| **Production code** | Skill document (SKILL.md) |
-| **Test fails (RED)** | Agent violates rule without skill (baseline) |
-| **Test passes (GREEN)** | Agent complies with skill present |
-| **Refactor** | Close loopholes while maintaining compliance |
-| **Write test first** | Run baseline scenario BEFORE writing skill |
-| **Watch it fail** | Document exact rationalizations agent uses |
-| **Minimal code** | Write skill addressing those specific violations |
-| **Watch it pass** | Verify agent now complies |
-| **Refactor cycle** | Find new rationalizations → plug → re-verify |
+| **Documentation** | Skill document (SKILL.md) |
+| **Baseline failure** | Agent violates rule without skill (baseline) |
+| **Compliance** | Agent complies with skill present |
+| **Refinement** | Close loopholes while maintaining compliance |
+| **Baseline test first** | Run baseline scenario BEFORE writing skill |
+| **Observe failure** | Document exact rationalizations agent uses |
+| **Minimal guidance** | Write skill addressing those specific violations |
+| **Verify compliance** | Verify agent now complies |
+| **Refinement cycle** | Find new rationalizations → plug → re-verify |
 
-The entire skill creation process follows RED-GREEN-REFACTOR.
+The entire skill creation process follows an empirical testing cycle.
 
 ## When to Create a Skill
 
@@ -162,7 +160,7 @@ When the description was changed to just "Use when executing implementation plan
 description: Use when executing plans - dispatches subagent per task with code review between tasks
 
 # ❌ BAD: Too much process detail
-description: Use for TDD - write test first, watch it fail, write minimal code, refactor
+description: Use for debugging - reproduce error, find root cause, fix and verify
 
 # ✅ GOOD: Just triggering conditions, no workflow summary
 description: Use when executing implementation plans with independent tasks in the current session
@@ -280,10 +278,10 @@ wc -w skills/path/SKILL.md
 **When writing documentation that references other skills:**
 
 Use skill name only, with explicit requirement markers:
-- ✅ Good: `**REQUIRED SUB-SKILL:** Use superpowers:test-driven-development`
+- ✅ Good: `**REQUIRED SUB-SKILL:** Use superpowers:writing-plans`
 - ✅ Good: `**REQUIRED BACKGROUND:** You MUST understand superpowers:systematic-debugging`
-- ❌ Bad: `See skills/testing/test-driven-development` (unclear if required)
-- ❌ Bad: `@skills/testing/test-driven-development/SKILL.md` (force-loads, burns context)
+- ❌ Bad: `See skills/planning/writing-plans` (unclear if required)
+- ❌ Bad: `@skills/planning/writing-plans/SKILL.md` (force-loads, burns context)
 
 **Why no @ links:** `@` syntax force-loads files immediately, consuming 200k+ context before you need them.
 
@@ -373,7 +371,7 @@ When: Reference material too large for inline
 
 Invoke bundled scripts through their interpreter in the prose (`bash scripts/tool.sh`, `node scripts/tool.js`), never by bare path: some harness plugin packagers strip executable bits, and a bare `scripts/tool.sh` fails there with `Permission denied`.
 
-## The Iron Law (Same as TDD)
+## The Iron Law of Skill Testing
 
 ```
 NO SKILL WITHOUT A FAILING TEST FIRST
@@ -392,15 +390,13 @@ Edit skill without testing? Same violation.
 - Don't "adapt" while running tests
 - Delete means delete
 
-**REQUIRED BACKGROUND:** The superpowers:test-driven-development skill explains why this matters. Same principles apply to documentation.
-
 ## Testing All Skill Types
 
 Different skill types need different test approaches:
 
 ### Discipline-Enforcing Skills (rules/requirements)
 
-**Examples:** TDD, verification-before-completion, designing-before-coding
+**Examples:** verification-before-completion, systematic-debugging, designing-before-coding
 
 **Test with:**
 - Academic questions: Do they understand the rules?
@@ -477,7 +473,7 @@ Before writing guidance, classify the baseline failure. The form that bulletproo
 
 ## Bulletproofing Skills Against Rationalization
 
-Skills that enforce discipline (like TDD) need to resist rationalization. Agents are smart and will find loopholes when under pressure.
+Skills that enforce discipline (like verification-before-completion) need to resist rationalization. Agents are smart and will find loopholes when under pressure.
 
 **Scope:** this toolkit is for discipline failures — an agent that knows the rule and skips it under pressure. For wrong-shaped output or omitted elements, prohibition-based bulletproofing backfires; use the forms in Match the Form to the Failure instead.
 
@@ -489,19 +485,19 @@ Don't just state the rule - forbid specific workarounds:
 
 <Bad>
 ```markdown
-Write code before test? Delete it.
+Claiming done without running tests? Run verification first.
 ```
 </Bad>
 
 <Good>
 ```markdown
-Write code before test? Delete it. Start over.
+Claiming done without running tests? Stop. Run the full verification suite.
 
 **No exceptions:**
-- Don't keep it as "reference"
-- Don't "adapt" it while writing tests
-- Don't look at it
-- Delete means delete
+- Don't say "the change is obvious"
+- Don't say "I verified it in my head"
+- Don't skip because tests are slow
+- Verification means actual execution
 ```
 </Good>
 
@@ -522,9 +518,9 @@ Capture rationalizations from baseline testing (see Testing section below). Ever
 ```markdown
 | Excuse | Reality |
 |--------|---------|
-| "Too simple to test" | Simple code breaks. Test takes 30 seconds. |
-| "I'll test after" | Tests passing immediately prove nothing. |
-| "Tests after achieve same goals" | Tests-after = "what does this do?" Tests-first = "what should this do?" |
+| "Too simple to verify" | Simple changes break things. Verification takes seconds. |
+| "I'll verify later" | Unverified code breaks builds. Verify before claiming done. |
+| "Tests aren't necessary for small changes" | Small changes cause outages. Run the tests. |
 ```
 
 ### Create Red Flags List
@@ -532,15 +528,15 @@ Capture rationalizations from baseline testing (see Testing section below). Ever
 Make it easy for agents to self-check when rationalizing:
 
 ```markdown
-## Red Flags - STOP and Start Over
+## Red Flags - STOP and Verify
 
-- Code before test
-- "I already manually tested it"
-- "Tests after achieve the same purpose"
+- Claiming completion without running tests
+- "I already manually checked it in my head"
+- "Tests aren't necessary for this small change"
 - "It's about spirit not ritual"
 - "This is different because..."
 
-**All of these mean: Delete code. Start over with TDD.**
+**All of these mean: Stop. Run the verification.**
 ```
 
 ### Update SDO for Violation Symptoms
@@ -551,26 +547,26 @@ Add to description: symptoms of when you're ABOUT to violate the rule:
 description: use when implementing any feature or bugfix, before writing implementation code
 ```
 
-## RED-GREEN-REFACTOR for Skills
+## Testing Cycle for Skills
 
-Follow the TDD cycle:
+Follow the testing cycle:
 
-### RED: Write Failing Test (Baseline)
+### Baseline: Run Test Without Skill (Watch It Fail)
 
 Run pressure scenario with subagent WITHOUT the skill. Document exact behavior:
 - What choices did they make?
 - What rationalizations did they use (verbatim)?
 - Which pressures triggered violations?
 
-This is "watch the test fail" - you must see what agents naturally do before writing the skill.
+This is observing baseline behavior - you must see what agents naturally do before writing the skill.
 
-### GREEN: Write Minimal Skill
+### Implementation: Write Minimal Skill
 
 Write skill that addresses those specific rationalizations. Don't add extra content for hypothetical cases.
 
 Run same scenarios WITH skill. Agent should now comply.
 
-### REFACTOR: Close Loopholes
+### Refinement: Close Loopholes
 
 Agent found new rationalization? Add explicit counter. Re-test until bulletproof.
 
@@ -626,30 +622,30 @@ helper1, helper2, step3, pattern4
 
 Deploying untested skills = deploying untested code. It's a violation of quality standards.
 
-## Skill Creation Checklist (TDD Adapted)
+## Skill Creation Checklist
 
 **IMPORTANT: Create a todo for EACH checklist item below.**
 
-**RED Phase - Write Failing Test:**
+**Baseline Phase - Observe Failures:**
 - [ ] Create pressure scenarios (3+ combined pressures for discipline skills)
 - [ ] Run scenarios WITHOUT skill - document baseline behavior verbatim
 - [ ] Identify patterns in rationalizations/failures
 
-**GREEN Phase - Write Minimal Skill:**
+**Implementation Phase - Write Minimal Skill:**
 - [ ] Name uses only letters, numbers, hyphens (no parentheses/special chars)
 - [ ] YAML frontmatter with required `name` and `description` fields (max 1024 chars; see [spec](https://agentskills.io/specification))
 - [ ] Description starts with "Use when..." and includes specific triggers/symptoms
 - [ ] Description written in third person
 - [ ] Keywords throughout for search (errors, symptoms, tools)
 - [ ] Clear overview with core principle
-- [ ] Address specific baseline failures identified in RED
+- [ ] Address specific baseline failures identified in baseline testing
 - [ ] Guidance form matches the failure type (see Match the Form to the Failure)
 - [ ] For behavior-shaping guidance: wording micro-tested against a no-guidance control (5+ reps, every flagged match read manually) — N/A for pure reference skills
 - [ ] Code inline OR link to separate file
 - [ ] One excellent example (not multi-language)
 - [ ] Run scenarios WITH skill - verify agents now comply
 
-**REFACTOR Phase - Close Loopholes:**
+**Refinement Phase - Close Loopholes:**
 - [ ] Identify NEW rationalizations from testing
 - [ ] Add explicit counters (if discipline skill)
 - [ ] Build rationalization table from all test iterations

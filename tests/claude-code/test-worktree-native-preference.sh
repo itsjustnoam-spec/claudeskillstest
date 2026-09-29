@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Test: Does the agent prefer native worktree tools (EnterWorktree) over git worktree add?
-# Framework: RED-GREEN-REFACTOR per testing-skills-with-subagents.md
+# Framework: Baseline and pressure testing per testing-skills-with-subagents.md
 #
 # Drill coverage: evals/scenarios/worktree-creation-under-pressure.yaml lifts
 # only the PRESSURE phase (existing .worktrees/ + urgency framing). The RED
 # and GREEN baselines below are not covered by drill — kept here so the
-# RED-GREEN-REFACTOR validation remains rerunnable end-to-end.
+# validation remains rerunnable end-to-end.
 #
 # RED:   Skill without Step 1a (no native tool preference). Agent should use git worktree add.
 # GREEN: Skill with Step 1a (explicit tool naming + consent bridge). Agent should use EnterWorktree.

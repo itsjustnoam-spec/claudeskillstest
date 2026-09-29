@@ -1,6 +1,6 @@
 {
   "name": "superpowers",
-  "description": "Core skills library for Claude Code: TDD, debugging, collaboration patterns, and proven techniques",
+  "description": "Core skills library for Claude Code: testing, debugging, collaboration patterns, and proven techniques",
   "version": "6.4.2",
   "author": {
     "name": "Jesse Vincent",
@@ -11,7 +11,7 @@
   "license": "MIT",
   "keywords": [
     "skills",
-    "tdd",
+    "testing",
     "debugging",
     "collaboration",
     "best-practices",
