@@ -33,12 +33,22 @@ This structure informs the task decomposition. Each task should produce self-con
 
 ## Task Right-Sizing
 
-A task is the smallest unit that carries its own test cycle and is worth a
+A task is the smallest unit that delivers a cohesive change and is worth a
 fresh reviewer's gate. When drawing task boundaries: fold setup,
 configuration, scaffolding, and documentation steps into the task whose
 deliverable needs them; split only where a reviewer could meaningfully
 reject one task while approving its neighbor. Each task ends with an
-independently testable deliverable.
+independently verifiable deliverable.
+
+**Subagent Test Responsibility:**
+Subagents implementing feature tasks do NOT need to write or add new tests.
+Their responsibility is implementing the requested functionality and ensuring
+that lint and existing tests pass at the end of their task without regressions.
+
+**Final Test Task:**
+Every plan MUST end with a final, dedicated task whose specific purpose is to
+add new unit and integration tests covering all features, interfaces, and
+edge cases implemented across Tasks 1..N-1.
 
 ## Exact Success Predicates
 
@@ -47,16 +57,23 @@ Every task in a generated plan must include an exact success predicate: a single
 **Why:** Under persistence pressure, implementers often produce "answer-shaped near misses" (mocking complex logic instead of implementing it, omitting edge-case error branches, or writing vacuous test assertions). An exact success predicate eliminates ambiguity by defining a concrete, falsifiable condition that proves the task is genuinely complete and functionally verified.
 
 **Rules for Success Predicates:**
-- **Quantified & checkable:** A single condition that can be objectively evaluated (e.g. command output, exit code, count of passing tests, or specific state check).
+- **Quantified & checkable:** A single condition that can be objectively evaluated (e.g. command output, exit code, count of passing tests, or clean linting check).
+- **For implementation tasks:** The predicate confirms the implementation is in place and that lint + existing tests pass cleanly without regressions or warnings (e.g. `npm run lint && npm test` passes with 0 errors).
+- **For the final test task:** The predicate confirms that new comprehensive tests are added and that lint + all tests pass with quantified assertions covering newly implemented features and error paths.
 - **No answer-shaped near misses:** Explicitly forbid mocking or stubbing out the core logic under test, skipping edge-case error branches, or writing vacuous assertions (like asserting true or checking mock call counts instead of actual data).
-- **End-to-end for the task:** Must confirm real execution of the code and tests created or modified in the task.
 
 ## Step Granularity
 
 **Each step is one action with a checkable result:**
-- "Write the test" - step
+
+For implementation tasks:
 - "Implement the code" - step
-- "Run the tests and make sure they pass" - step
+- "Run lint and tests to verify they pass" - step
+- "Commit" - step
+
+For the final test task:
+- "Write new tests" - step
+- "Run lint and test suite to verify all pass" - step
 - "Commit" - step
 
 ## Plan Document Header
@@ -86,20 +103,21 @@ include this section.]
 
 ## Review Focus
 
-[The five input classes or failure modes the spec implies but no task's
-tests exercise that are most likely to bite a person using this software
-— one line each, naming the input or condition and the behavior a
-reasonable person would expect, most likely first. The spec is a vision
-document: it says what the software must do, not everything it will
-meet, and its silence on an input is not permission for that input to
-break the program. Write the list here, once, with the spec in front of
-you. Then, for each line, add the test that pins it to the task that
-owns the code, in that task's own step style.]
+[The five input classes or failure modes the spec implies that are most
+likely to bite a person using this software — one line each, naming the
+input or condition and the behavior a reasonable person would expect, most
+likely first. The spec is a vision document: it says what the software must
+do, not everything it will meet, and its silence on an input is not
+permission for that input to break the program. Write the list here, once,
+with the spec in front of you. The final task of the plan will add new tests
+covering these cases.]
 
 ---
 ```
 
 ## Task Structure
+
+### Standard Implementation Task Template (Tasks 1..N-1):
 
 ````markdown
 ### Task N: [Component Name]
@@ -107,7 +125,6 @@ owns the code, in that task's own step style.]
 **Files:**
 - Create: `exact/path/to/file.py`
 - Modify: `exact/path/to/existing.py:123-145`
-- Test: `tests/exact/path/to/test.py`
 
 **Interfaces:**
 - Consumes: [what this task uses from earlier tasks — exact signatures]
@@ -115,32 +132,60 @@ owns the code, in that task's own step style.]
   and return types. A task's implementer sees only their own task; this
   block is how they learn the names and types neighboring tasks use.]
 
-**Success Predicate:** [A single quantified, checkable completion condition — e.g. `pytest tests/path/test.py -v` passes with 3 non-mock test cases verifying real behavior and error branches, 0 failures, and 0 warnings]
+**Success Predicate:** [A single quantified, checkable completion condition — e.g. `npm run lint && npm test` passes with 0 lint errors, 0 test failures, and 0 warnings]
 
 - [ ] **Step 1: Implement `function(input: InputType) -> ResultType` in `exact/path/to/file.py`**
 
-One line on the approach when the signature and the test leave a choice
-(which library call, which data structure); a code block only for an
-algorithm they do not determine.
+One line on the approach when the signature leaves a choice (which library call, which data structure); a code block only for an algorithm they do not determine.
 
-- [ ] **Step 2: Add tests in `tests/path/test.py`**
+- [ ] **Step 2: Run lint and existing tests to verify they pass**
+
+Run: `npm run lint && npm test`
+Expected: 0 lint errors, all existing tests pass
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/path/file.py
+git commit -m "feat: implement specific feature"
+```
+````
+
+### Final Test Task Template (Task N - Latest Task in Plan):
+
+````markdown
+### Task N: Add New Tests for [Feature Name]
+
+**Files:**
+- Create: `tests/exact/path/to/test.py`
+- Modify: `tests/existing_test.py` (if applicable)
+
+**Purpose:** Add comprehensive new tests for all functionality and interfaces implemented across Tasks 1..N-1, covering success paths, edge cases, and error branches.
+
+**Success Predicate:** [A single quantified, checkable completion condition — e.g. `pytest tests/path/test.py -v` passes with N non-mock test cases verifying real behavior and edge cases, plus lint passes clean with 0 warnings]
+
+- [ ] **Step 1: Write unit and integration tests in `tests/path/test.py`**
 
 ```python
 def test_specific_behavior():
     result = function(input)
     assert result == expected
+
+def test_edge_case_error():
+    with pytest.raises(SpecificError):
+        function(bad_input)
 ```
 
-- [ ] **Step 3: Run test to verify it passes**
+- [ ] **Step 2: Run lint and full test suite to verify they pass**
 
-Run: `pytest tests/path/test.py::test_name -v`
-Expected: PASS
+Run: `pytest -v && ruff check .`
+Expected: All tests pass, 0 lint errors
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 3: Commit**
 
 ```bash
-git add tests/path/test.py src/path/file.py
-git commit -m "feat: add specific feature"
+git add tests/path/test.py
+git commit -m "test: add unit and integration tests for [feature name]"
 ```
 ````
 
@@ -150,14 +195,14 @@ A step is done when the implementer can write exactly one reasonable thing
 from it. That is the whole requirement: unambiguous, not complete. Each kind
 of step carries what makes it unambiguous and nothing more:
 
-- **A test step:** the test's name and its assertions, as code, with the
-  spec's exact values in them.
 - **A code step:** the exact signature (name, parameters, return type), the
   file it lives in, and the specific values the spec pins. The implementer
   writes the body. A body appears only for an algorithm the signature and
-  tests do not determine, or for exact copy the spec fixes.
-- **A verification step:** the command to run and the output that means it
-  passed.
+  interfaces do not determine, or for exact copy the spec fixes.
+- **A verification step (lint + tests):** the commands to run lint and tests,
+  and the expected output confirming clean execution and zero regressions.
+- **A test-writing step (in the final task):** the test's name and its assertions,
+  as code, with the spec's exact values in them.
 - **A reference to another task:** that task's Interfaces block says what
   to use; the plan does not repeat that task's code.
 
@@ -177,11 +222,13 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 
 **3. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
 
-**4. Review Focus:** For each input class or failure mode the spec implies, is there a task whose tests exercise it? The five uncovered ones most likely to bite a person go in the Review Focus section, and each line there gets its test added to the owning task. An empty section means you checked and found none, not that you skipped the check.
+**4. Review Focus:** For each input class or failure mode the spec implies, are they covered by the tests in the final test task?
 
 **5. Proportion:** Compare the plan's length to the spec's. A plan several times longer than the spec it implements is a transcript of the program, not a plan. If code blocks are most of the document, replace bodies with signatures, test names and assertions, and check that each step is still unambiguous.
 
 **6. Success Predicates:** Does every task include an exact success predicate — a single quantified, checkable completion condition? Does each predicate prevent answer-shaped near misses (mocking complex logic instead of implementing it, omitting edge-case error branches, or writing vacuous test assertions)?
+
+**7. Final Test Task:** Is the latest task in the plan dedicated to adding new tests covering the newly implemented features and edge cases, while earlier tasks focus on implementation and verifying lint + existing tests pass?
 
 If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
 

@@ -95,6 +95,11 @@ Subagent (general-purpose):
 
     - **Success Predicate & Near Misses:** Verify the task's exact success predicate
       (the single quantified, checkable completion condition) was genuinely satisfied:
+      - For regular implementation tasks: subagents are NOT required to add new tests;
+        they must ensure the requested code is implemented and that lint + existing tests
+        pass cleanly without regressions. Do NOT flag missing new tests on implementation tasks.
+      - For the final test-writing task: verify that comprehensive new tests were added
+        covering the feature, edge cases, and interfaces.
       - Reject "answer-shaped near misses":
         - Mocking complex logic instead of implementing it
         - Omitting edge-case error branches
@@ -125,9 +130,10 @@ Subagent (general-purpose):
     - DRY without premature abstraction?
     - Edge cases handled?
 
-    **Tests:**
-    - Do the new and changed tests verify real behavior, not mocks?
-    - Are the task's edge cases covered?
+    **Tests & Lint:**
+    - Did the implementer ensure lint + tests pass cleanly at the end of the task?
+    - On regular implementation tasks: verify no regressions were introduced (new tests are NOT required).
+    - On the final test task: do new tests verify real behavior, cover edge cases and error branches, and avoid vacuous assertions or excessive mocking?
 
     **Structure:**
     - Does each file have one clear responsibility with a well-defined interface?

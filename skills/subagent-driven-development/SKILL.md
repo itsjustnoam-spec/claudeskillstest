@@ -67,7 +67,7 @@ digraph process {
         "Dispatch implementer subagent (./implementer-prompt.md)" [shape=box];
         "Implementer asks questions?" [shape=diamond];
         "Answer questions, provide context" [shape=box];
-        "Implementer implements, tests, commits, self-reviews" [shape=box];
+        "Implementer implements, runs lint + tests, commits, self-reviews" [shape=box];
         "Generate review package, dispatch task reviewer (./task-reviewer-prompt.md)" [shape=box];
         "Spec ✅ and quality approved?" [shape=diamond];
         "Finding conflicts with plan text?" [shape=diamond];
@@ -93,9 +93,9 @@ digraph process {
     "Setup: worktree, ledger check, read plan, pre-flight review" -> "Dispatch implementer subagent (./implementer-prompt.md)";
     "Dispatch implementer subagent (./implementer-prompt.md)" -> "Implementer asks questions?";
     "Implementer asks questions?" -> "Answer questions, provide context" [label="yes"];
-    "Answer questions, provide context" -> "Implementer implements, tests, commits, self-reviews";
-    "Implementer asks questions?" -> "Implementer implements, tests, commits, self-reviews" [label="no"];
-    "Implementer implements, tests, commits, self-reviews" -> "Generate review package, dispatch task reviewer (./task-reviewer-prompt.md)";
+    "Answer questions, provide context" -> "Implementer implements, runs lint + tests, commits, self-reviews";
+    "Implementer asks questions?" -> "Implementer implements, runs lint + tests, commits, self-reviews" [label="no"];
+    "Implementer implements, runs lint + tests, commits, self-reviews" -> "Generate review package, dispatch task reviewer (./task-reviewer-prompt.md)";
     "Generate review package, dispatch task reviewer (./task-reviewer-prompt.md)" -> "Spec ✅ and quality approved?";
     "Spec ✅ and quality approved?" -> "Append completion to ledger, mark todo complete" [label="yes"];
     "Spec ✅ and quality approved?" -> "Finding conflicts with plan text?" [label="no"];
@@ -484,13 +484,13 @@ You: "User level (~/.config/superpowers/hooks/)"
 
 Implementer: [Later]
   - Implemented install-hook command
-  - Added tests, 5/5 passing
+  - Verified lint + tests, 5/5 passing, clean
   - Self-review: Found I missed --force flag, added it
   - Committed
 
 [Run review-package PLAN_FILE BASE HEAD; dispatch task reviewer with the printed path]
-Task reviewer: Spec ✅ - all requirements met, nothing extra.
-  Strengths: Good test coverage, clean. Issues: None. Task quality: Approved.
+Task reviewer: Spec ✅ - all requirements and success predicate met, nothing extra.
+  Strengths: Clean implementation, lint and existing tests pristine. Issues: None. Task quality: Approved.
 
 [Ledger: Task 1: complete (commits a1b2c3d..d4e5f6a, review clean)]
 
@@ -500,7 +500,7 @@ Task 2: Recovery modes
 
 Implementer: [No questions]
   - Added verify/repair modes
-  - 8/8 tests passing
+  - Lint + existing tests passing (8/8)
   - Committed
 
 [Run review-package PLAN_FILE BASE HEAD; dispatch task reviewer with the printed path]
@@ -521,6 +521,19 @@ Re-reviewer: Missing progress reporting — ADDRESSED (src/recovery.js:41).
 [Ledger: Task 2: complete (commits d4e5f6a..b7c8d9e, review clean)]
 
 ...
+
+Task 3: Add new unit and integration tests
+
+[Run task-brief for Task 3; dispatch implementer with brief + report paths + context]
+Implementer: [No questions]
+  - Added new comprehensive unit and integration tests covering all features and edge cases
+  - Lint + full test suite passing clean (15/15)
+  - Committed
+
+[Run review-package PLAN_FILE BASE HEAD; dispatch task reviewer with the printed path]
+Task reviewer: Spec ✅ - comprehensive tests added with real assertions, no vacuous checks, lint and tests pristine. Task quality: Approved.
+
+[Ledger: Task 3: complete (commits b7c8d9e..f1e2d3c, review clean)]
 
 [After all tasks]
 [Run review-package PLAN_FILE MERGE_BASE HEAD; dispatch final code-reviewer]

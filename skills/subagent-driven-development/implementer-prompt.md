@@ -30,12 +30,14 @@ Subagent (general-purpose):
     ## Your Job
 
     Once you're clear on requirements:
-    1. Implement exactly what the task specifies
-    2. Write tests
-    3. Verify implementation works and satisfies the task's Success Predicate
+    1. Implement exactly what the task specifies (or write new tests if this task is the final test task)
+    2. Run lint and tests at the end of the task to make sure they pass cleanly
+    3. Verify that the task's Success Predicate is satisfied
     4. Commit your work
     5. Self-review (see below)
     6. Report back
+
+    **Note on tests:** You do NOT need to write new tests on regular implementation tasks. Your responsibility is implementing the code and making sure lint and existing tests pass cleanly at the end of your task. The final task of the plan is dedicated to adding new tests.
 
     Work from: [directory]
 
@@ -106,15 +108,15 @@ Subagent (general-purpose):
     - Did I only build what was requested?
     - Did I follow existing patterns in the codebase?
 
-    **Testing & Success Predicate:**
+    **Testing, Lint & Success Predicate:**
+    - Did I make sure lint + tests pass cleanly at the end of the task with pristine output?
+    - Are there any regressions in existing functionality?
+    - If this is the final test task:
+      - Did I write comprehensive new tests covering all functionality, interfaces, and edge cases?
+      - Are test assertions meaningful and non-vacuous (verifying actual state and data)?
+      - Are edge-case error branches tested?
     - Did I satisfy the task's exact success predicate (the single quantified, checkable completion condition)?
-    - Did I produce real implementation rather than an "answer-shaped near miss"?
-      - Did I implement actual complex logic instead of mocking or stubbing it out?
-      - Did I implement and test all required edge-case error branches?
-      - Are test assertions meaningful and non-vacuous (verifying actual state and data, not just `assert True` or mock call counts)?
-    - Do tests actually verify real behavior (not just mock behavior)?
-    - Are tests comprehensive?
-    - Is the test output pristine (no stray warnings or noise)?
+    - Did I produce real implementation rather than an "answer-shaped near miss" (no mocking complex logic where real logic is needed, no skipped error branches, no vacuous assertions)?
 
     If you find issues during self-review, fix them now before reporting.
 
@@ -132,7 +134,8 @@ Subagent (general-purpose):
     Write your full report to [REPORT_FILE]:
     - What you implemented (or what you attempted, if blocked)
     - How the exact success predicate was satisfied (command, output, verified conditions)
-    - What you tested and test results
+    - Confirmation that lint + tests passed cleanly at the end of the task
+    - What was tested and test results
     - Files changed
     - Self-review findings (if any)
     - Any issues or concerns
