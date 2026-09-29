@@ -129,18 +129,6 @@ Do not modify the command or add additional flags.
 * **Narrow bridge with cliffs on both sides**: There's only one safe way forward. Provide specific guardrails and exact instructions (low freedom). Example: database migrations that must run in exact sequence.
 * **Open field with no hazards**: Many paths lead to success. Give general direction and trust the agent to find the best route (high freedom). Example: code reviews where context determines the best approach.
 
-### Test with all models you plan to use
-
-Skills act as additions to models, so effectiveness depends on the underlying model. Test your Skill with all the models you plan to use it with.
-
-**Testing considerations by model capability**:
-
-* **Fast / economical models**: Does the Skill provide enough guidance?
-* **Standard / balanced models**: Is the Skill clear and efficient?
-* **High-reasoning / flagship models**: Does the Skill avoid over-explaining?
-
-What works perfectly for high-reasoning models might need more detail for smaller, faster models. If you plan to use your Skill across multiple models, aim for instructions that work well with all of them.
-
 ## Skill structure
 
 <Note>
@@ -1129,7 +1117,6 @@ Before sharing a Skill, verify:
 ### Testing
 
 * [ ] At least three evaluations created
-* [ ] Tested across intended model capability tiers (fast, balanced, flagship)
 * [ ] Tested with real usage scenarios
 * [ ] Team feedback incorporated (if applicable)
 
