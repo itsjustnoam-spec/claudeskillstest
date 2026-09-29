@@ -40,8 +40,8 @@ Or configure Claude Code plugin settings pointing to this directory.
 
 1. **brainstorming** — Activates before writing code. Explores user intent, asks clarifying questions, presents designs in reviewable sections.
 2. **using-git-worktrees** — Activates after design approval. Creates an isolated workspace on a new branch with a clean baseline.
-3. **writing-plans** — Breaks designs into bite-sized tasks with explicit verification steps.
-4. **subagent-driven-development** or **executing-plans** — Dispatches fresh subagents per task with two-stage reviews, or executes plans systematically inline.
+3. **writing-plans** — Breaks designs into bite-sized tasks with explicit verification steps. Automatically executed after design approval and always selects subagent-driven development.
+4. **subagent-driven-development** — Dispatches fresh subagents per task with two-stage reviews.
 5. **requesting-code-review** & **receiving-code-review** — Pre-review verification and structured feedback incorporation.
 6. **systematic-debugging** — 4-phase root cause process (investigate, hypothesize, test, fix).
 7. **verification-before-completion** — Verifies evidence before declaring completion.

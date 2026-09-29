@@ -44,8 +44,7 @@ those, stop and ask.
 
 ## When to Use
 
-- You have a plan from superpowers:writing-plans and your human partner
-  chose inline execution at the handoff.
+- You explicitly chose inline execution or subagents are unavailable.
 - Your harness has no subagent tool (see the per-platform references in
   `../using-superpowers/references/`). Never fabricate a dispatch; run
   the plan here.
