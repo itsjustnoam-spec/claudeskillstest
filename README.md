@@ -36,27 +36,6 @@ Or configure Claude Code plugin settings pointing to this directory.
 
 ---
 
-## Local Execution via LiteLLM
-
-If you run Claude Code against local models via a LiteLLM proxy:
-
-1. **Start your LiteLLM proxy** pointing to your local model backend (e.g. Ollama, vLLM, LM Studio).
-2. **Configure Claude Code** environment variables before launching:
-
-   ```bash
-   export ANTHROPIC_BASE_URL="http://localhost:4000"
-   export ANTHROPIC_API_KEY="sk-litellm-dummy-key"
-   ```
-
-3. Launch Claude Code:
-   ```bash
-   claude
-   ```
-
-Superpowers skills are model-agnostic and use capability tiers (fast/lightweight, balanced, flagship/reasoning) rather than hardcoded proprietary model identifiers.
-
----
-
 ## The Core Workflow
 
 1. **brainstorming** — Activates before writing code. Explores user intent, asks clarifying questions, presents designs in reviewable sections.
