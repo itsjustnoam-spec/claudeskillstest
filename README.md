@@ -4,14 +4,15 @@ Superpowers is a complete software development methodology for Claude Code, buil
 
 ## How it works
 
-When Claude Code starts up, Superpowers injects process-level guidance:
-1. **Brainstorming before coding**: Steps back, asks clarifying questions, presents designs in structured sections, and gets approval before writing any code.
-2. **Worktrees & plans**: Sets up clean isolated git worktrees and produces bite-sized, verified implementation plans.
-3. **Subagent-Driven Development (SDD) & Inline Execution**: Breaks tasks down and delegates to fresh, isolated subagents with two-stage reviews (spec compliance and code quality) or executes plans methodically inline.
-4. **Test-Driven Development (TDD)**: Strictly enforces RED-GREEN-REFACTOR cycles, eliminating unverified code.
-5. **Systematic Debugging**: Follows a 4-phase root-cause investigation process rather than guessing.
+It starts from the moment you fire up Claude Code. As soon as it sees that you're building something, it *doesn't* just jump into trying to write code. Instead, it steps back and asks you what you're really trying to do. 
 
-Because the skills trigger automatically via Claude Code hooks, no special manual invocation is required.
+Once it's teased a spec out of the conversation, it shows it to you in chunks short enough to actually read and digest. 
+
+After you've signed off on the design, your agent puts together an implementation plan that's clear enough for an enthusiastic junior engineer with poor taste, no judgement, no project context, and an aversion to testing to follow. It emphasizes true red/green TDD, YAGNI (You Aren't Gonna Need It), and DRY. 
+
+Next up, once you say "go", it launches a *subagent-driven-development* process, having agents work through each engineering task, inspecting and reviewing their work, and continuing forward. It's not uncommon for your agent to work autonomously for a couple hours at a time without deviating from the plan you put together.
+
+There's a bunch more to it, but that's the core of the system. And because the skills trigger automatically via Claude Code hooks, you don't need to do anything special. Your coding agent just has Superpowers.
 
 ---
 
