@@ -272,9 +272,10 @@ rush it into implementation.
 
 Per-task reviews are task-scoped gates. The broad review happens once, at the
 final whole-branch review. Never skip the task review, and never accept a
-report missing either verdict — spec compliance AND task quality are both
-required. Implementer self-review never replaces the task review; both are
-needed.
+report missing either verdict — spec compliance (verifying the task's exact
+success predicate is satisfied without answer-shaped near misses) AND task
+quality are both required. Implementer self-review never replaces the task
+review; both are needed.
 
 - Hand the reviewer its diff as a file: run this skill's
   `bash scripts/review-package PLAN_FILE BASE HEAD` and pass the reviewer the file path
@@ -453,6 +454,7 @@ Use superpowers:finishing-a-development-branch.
 | Excuse | Reality |
 |--------|---------|
 | "Close enough on spec compliance" | Reviewer found spec gaps = not done. Fix or hit the cap and adjudicate — those are the only exits. |
+| "Near-miss implementation passes superficial checks" | Answer-shaped near misses (mocking complex logic, omitted error branches, vacuous assertions) violate the success predicate. Require actual implementation and full verification. |
 | "I'll fix it myself, dispatching is overhead" | Controller fixes pollute your context and skip review. Resume the implementer. |
 | "One more round will converge" | Past the cap, rounds don't converge — the failure is structural. Adjudicate and route. |
 | "The reviewer will just find something new anyway" | Scoped re-reviews verify fixes; they cannot wander. New findings on untouched code go to the ledger, not the loop. |

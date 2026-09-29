@@ -89,10 +89,17 @@ Subagent (general-purpose):
     Re-running the suite to regenerate what you failed to read is not
     verification; illegibility of the evidence is not invalidation of it.
 
-    ## Part 1: Spec Compliance
+    ## Part 1: Spec Compliance & Success Predicate
 
-    Compare the diff against What Was Requested:
+    Compare the diff against What Was Requested and the task's Success Predicate:
 
+    - **Success Predicate & Near Misses:** Verify the task's exact success predicate
+      (the single quantified, checkable completion condition) was genuinely satisfied:
+      - Reject "answer-shaped near misses":
+        - Mocking complex logic instead of implementing it
+        - Omitting edge-case error branches
+        - Writing vacuous test assertions (asserting True, asserting mock calls without validating state/data, or testing trivial cases while ignoring core requirements)
+      - If the success predicate is evaded or unfulfilled, flag as Important or Critical.
     - **Missing:** requirements they skipped, missed, or claimed without
       implementing
     - **Extra:** features that weren't requested, over-engineering, unneeded
@@ -160,7 +167,7 @@ Subagent (general-purpose):
 
     ### Spec Compliance
 
-    - ✅ Spec compliant | ❌ Issues found: [what's missing/extra/misunderstood,
+    - ✅ Spec compliant & success predicate met | ❌ Issues found: [what's missing/extra/misunderstood or near-miss findings,
       with file:line references]
     - ⚠️ Cannot verify from diff: [requirements you could not verify from the
       diff alone, and what the controller should check — report alongside the

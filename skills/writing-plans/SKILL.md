@@ -40,6 +40,17 @@ deliverable needs them; split only where a reviewer could meaningfully
 reject one task while approving its neighbor. Each task ends with an
 independently testable deliverable.
 
+## Exact Success Predicates
+
+Every task in a generated plan must include an exact success predicate: a single quantified, checkable completion condition.
+
+**Why:** Under persistence pressure, implementers often produce "answer-shaped near misses" (mocking complex logic instead of implementing it, omitting edge-case error branches, or writing vacuous test assertions). An exact success predicate eliminates ambiguity by defining a concrete, falsifiable condition that proves the task is genuinely complete and functionally verified.
+
+**Rules for Success Predicates:**
+- **Quantified & checkable:** A single condition that can be objectively evaluated (e.g. command output, exit code, count of passing tests, or specific state check).
+- **No answer-shaped near misses:** Explicitly forbid mocking or stubbing out the core logic under test, skipping edge-case error branches, or writing vacuous assertions (like asserting true or checking mock call counts instead of actual data).
+- **End-to-end for the task:** Must confirm real execution of the code and tests created or modified in the task.
+
 ## Step Granularity
 
 **Each step is one action with a checkable result:**
@@ -104,6 +115,8 @@ owns the code, in that task's own step style.]
   and return types. A task's implementer sees only their own task; this
   block is how they learn the names and types neighboring tasks use.]
 
+**Success Predicate:** [A single quantified, checkable completion condition — e.g. `pytest tests/path/test.py -v` passes with 3 non-mock test cases verifying real behavior and error branches, 0 failures, and 0 warnings]
+
 - [ ] **Step 1: Implement `function(input: InputType) -> ResultType` in `exact/path/to/file.py`**
 
 One line on the approach when the signature and the test leave a choice
@@ -167,6 +180,8 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 **4. Review Focus:** For each input class or failure mode the spec implies, is there a task whose tests exercise it? The five uncovered ones most likely to bite a person go in the Review Focus section, and each line there gets its test added to the owning task. An empty section means you checked and found none, not that you skipped the check.
 
 **5. Proportion:** Compare the plan's length to the spec's. A plan several times longer than the spec it implements is a transcript of the program, not a plan. If code blocks are most of the document, replace bodies with signatures, test names and assertions, and check that each step is still unambiguous.
+
+**6. Success Predicates:** Does every task include an exact success predicate — a single quantified, checkable completion condition? Does each predicate prevent answer-shaped near misses (mocking complex logic instead of implementing it, omitting edge-case error branches, or writing vacuous test assertions)?
 
 If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
 

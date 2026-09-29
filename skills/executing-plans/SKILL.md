@@ -201,6 +201,10 @@ in this session — not inferred from the diff looking right:
 - The final test run for the task passed — `task-done` is that run, and
   it writes the command and result into the ledger line.
 - Every `Expected:` line in the brief was compared against real output.
+- The task's exact success predicate is satisfied: the single quantified,
+  checkable completion condition passed without answer-shaped near misses
+  (no mocked logic where real logic was required, no omitted edge-case error
+  branches, no vacuous test assertions).
 - Every deviation from the brief has a `Ruling:` line in the ledger.
 
 **REQUIRED SUB-SKILL:** superpowers:verification-before-completion governs

@@ -32,7 +32,7 @@ Subagent (general-purpose):
     Once you're clear on requirements:
     1. Implement exactly what the task specifies
     2. Write tests
-    3. Verify implementation works
+    3. Verify implementation works and satisfies the task's Success Predicate
     4. Commit your work
     5. Self-review (see below)
     6. Report back
@@ -106,8 +106,13 @@ Subagent (general-purpose):
     - Did I only build what was requested?
     - Did I follow existing patterns in the codebase?
 
-    **Testing:**
-    - Do tests actually verify behavior (not just mock behavior)?
+    **Testing & Success Predicate:**
+    - Did I satisfy the task's exact success predicate (the single quantified, checkable completion condition)?
+    - Did I produce real implementation rather than an "answer-shaped near miss"?
+      - Did I implement actual complex logic instead of mocking or stubbing it out?
+      - Did I implement and test all required edge-case error branches?
+      - Are test assertions meaningful and non-vacuous (verifying actual state and data, not just `assert True` or mock call counts)?
+    - Do tests actually verify real behavior (not just mock behavior)?
     - Are tests comprehensive?
     - Is the test output pristine (no stray warnings or noise)?
 
@@ -126,6 +131,7 @@ Subagent (general-purpose):
 
     Write your full report to [REPORT_FILE]:
     - What you implemented (or what you attempted, if blocked)
+    - How the exact success predicate was satisfied (command, output, verified conditions)
     - What you tested and test results
     - Files changed
     - Self-review findings (if any)
