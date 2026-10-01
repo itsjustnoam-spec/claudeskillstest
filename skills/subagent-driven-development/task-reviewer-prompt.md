@@ -136,7 +136,7 @@ Subagent (general-purpose):
       - Package management adheres to `uv` skill.
       - Complete typing: parameters, variables, return types.
       - Never write `-> None` return type; never write `return None` (use bare `return`).
-      - Docstring format: `:param:`, `:return:`, `:raises:` on consecutive lines with NO empty lines between them.
+      - Docstrings format: Opening `"""` and closing `"""` must ALWAYS be on their own separate lines; consecutive lines for `:param:`, `:return:`, `:raises:` with NO empty lines between them.
       - Class docstrings: 3-line format (opening `"""` on line 1, description on line 2, closing `"""` on line 3).
       - API endpoint functions: short description only, no `:param:`.
       - Reverse proxy / redirect functions: short description only (no `:param:`, `:return:`, `:raises:`).

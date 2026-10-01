@@ -135,6 +135,7 @@ DOCSTRING EXPLANATION
 """
 ```
 
+- **Always On Separate Lines**: Opening `"""` and closing `"""` must **always** be on their own separate lines (never placed on the same line as the description or content). This applies universally across all docstrings (functions, classes, modules, and exceptions).
 - **No empty lines between fields**: `:param:`, `:return:`, and `:raises:` must appear on consecutive lines with zero blank lines between them.
 - **Selective docstrings**: Only write docstrings if explaining very important things or non-obvious contracts. Avoid redundant docstrings for trivial, self-explanatory code.
 - **Never mention past implementations**: Explain *why* the code works this way *now*, never what it used to do.
