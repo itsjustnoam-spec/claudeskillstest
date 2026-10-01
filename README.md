@@ -51,7 +51,8 @@ Or configure Claude Code plugin settings pointing to this directory.
 
 ## Skills Included
 
-* **Testing & Quality**: `verification-before-completion`
+* **Domain & Conventions**: `python-conventions`, `vue-conventions`
+* **Testing & Quality**: `pytest-conventions`, `verification-before-completion`
 * **Debugging**: `systematic-debugging`
 * **Collaboration & Execution**: `brainstorming`, `using-git-worktrees`, `writing-plans`, `executing-plans`, `subagent-driven-development`, `requesting-code-review`, `receiving-code-review`, `finishing-a-development-branch`, `dispatching-parallel-agents`, `gitlab-mr-review`
 * **Meta**: `using-superpowers`, `writing-skills`

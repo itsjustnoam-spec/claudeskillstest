@@ -30,6 +30,10 @@ recognize and correct, grounded in what they want to accomplish.
    the selected path's design artifact: the written spec for architectural
    work, or the in-chat design/probe for bounded work and spikes. Check
    proposed features and technical choices against that understanding.
+4. **Search existing codebase patterns.** Before proposing or designing new
+   components, abstractions, or utilities, actively search the codebase for
+   already-existing patterns, conventions, and implementations. Replicate
+   existing patterns rather than inventing new structures or conventions.
 
 When the request already supplies the purpose and constraints, reflect
 that understanding instead of asking the same questions again. Keep the
@@ -121,14 +125,14 @@ your path and complete them in order.
 5. **Report findings** — a recommendation; label anything built as throwaway
 
 **Bounded:**
-1. **Explore project context** — check files, docs, recent commits
+1. **Explore project context & search existing patterns** — check files, docs, recent commits, and search the codebase for already-existing patterns to replicate rather than inventing new ones
 2. **Ask clarifying questions** — one at a time, the ones that matter
 3. **Present short design in chat** — approach, files touched, testing
 4. **Get approval** — STOP and wait for an explicit yes; presenting the design and starting in the same breath is skipping the gate
 5. **Implement** — proceed with the normal development workflow; no plan document
 
 **Architectural:**
-1. **Explore project context** — check files, docs, recent commits
+1. **Explore project context & search existing patterns** — check files, docs, recent commits, and search the codebase for already-existing patterns to replicate rather than inventing new ones
 2. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 3. **Propose 2-3 approaches** — with trade-offs and your recommendation
 4. **Present design** — in sections scaled to their complexity, get user approval after each section
@@ -255,5 +259,5 @@ After the spec review passes, automatically invoke the `writing-plans` skill to 
 > "Spec written and committed to `<path>`. Automatically proceeding to create the implementation plan via `writing-plans`."
 
 - Automatically invoke the writing-plans skill to create a detailed implementation plan.
-- The plan will automatically select `superpowers:subagent-driven-development` as the execution method.
+- The plan will automatically select `subagent-driven-development` as the execution method.
 - Do NOT invoke any other skill. writing-plans is the next step.

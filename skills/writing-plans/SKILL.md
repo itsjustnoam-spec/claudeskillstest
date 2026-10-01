@@ -24,6 +24,7 @@ If the spec covers multiple independent subsystems, it should have been broken i
 
 Before defining tasks, map out which files will be created or modified and what each one is responsible for. This is where decomposition decisions get locked in.
 
+- **Search Existing Patterns First:** Actively search the codebase for already-existing patterns, conventions, directory layouts, and implementations before proposing new ones. Replicate established codebase patterns rather than inventing new structures, utilities, or abstractions.
 - Design units with clear boundaries and well-defined interfaces. Each file should have one clear responsibility.
 - You reason best about code you can hold in context at once, and your edits are more reliable when files are focused. Prefer smaller, focused files over large ones that do too much.
 - Files that change together should live together. Split by responsibility, not by technical layer.
@@ -48,7 +49,9 @@ that lint and existing tests pass at the end of their task without regressions.
 **Final Test Task:**
 Every plan MUST end with a final, dedicated task whose specific purpose is to
 add new unit and integration tests covering all features, interfaces, and
-edge cases implemented across Tasks 1..N-1.
+edge cases implemented across Tasks 1..N-1. For Python projects, this task
+must explicitly invoke and adhere to `pytest-conventions` (100%
+coverage, AAA structure, parametrization, fixture factories, and isolation).
 
 ## Exact Success Predicates
 
