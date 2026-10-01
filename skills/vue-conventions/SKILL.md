@@ -188,7 +188,7 @@ onMounted(() => {
   - **Never** write `if (!test)` or `if (test)` on objects, strings, numbers, arrays, or nullable/optional variables.
   - Fully check what you actually want to evaluate:
     - Null / Undefined: `if (test === null || test === undefined)` or `if (test !== null && test !== undefined)`
-    - Empty string: `if (test === '')` or `if (test.trim().length === 0)`
+    - Empty string: **Always check with `.trim()`** (e.g. `if (test.trim().length === 0)` or `if (test.trim() === '')`). **Never** check raw `=== ''` (which fails on whitespace-only strings) and **never** use loose `if (!test)`.
     - Empty array / collection: `if (test.length === 0)`
     - Numeric check: `if (test === 0)` or `if (test < 0)`
   - **Boolean Exception**: Only when a variable is strictly of type `boolean` (`true` or `false`), you may use `if (test)` or `if (!test)`.
