@@ -175,6 +175,9 @@ never in a call of its own.
 
 Follow the plan's steps in order. Run each verification step and ensure all tests pass.
 
+- **Search Existing Patterns First**: Before writing new code, classes, endpoints, or utilities, inspect the codebase for already-existing patterns and replicate them rather than inventing new conventions or structures.
+- **Domain Skills**: Strictly follow domain skills when implementing (`python-conventions` for backend, `vue-conventions` for frontend, and `pytest-conventions` for test tasks).
+
 Every step that runs a command has an `Expected:` line. Run the command,
 read its output, and compare. Three outcomes:
 

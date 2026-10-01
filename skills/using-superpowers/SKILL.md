@@ -25,10 +25,16 @@ Then announce "Using [skill] to [purpose]" and follow the skill exactly. If it h
 
 ## Skill Priority
 
-When multiple skills apply, process skills come first — they set the approach, then implementation skills (frontend-design, etc.) carry it out. Brainstorming and systematic-debugging are Superpowers' most common process skills, but the rule holds for any of them.
+When multiple skills apply, process skills come first — they set the approach, then domain & implementation skills carry it out. Brainstorming and systematic-debugging are Superpowers' most common process skills, but the rule holds for any of them.
 
-- "Let's build X" → superpowers:brainstorming first, then implementation skills.
-- "Fix this bug" → superpowers:systematic-debugging first, then domain skills.
+- "Let's build X" → brainstorming first, then domain skills.
+- "Fix this bug" → systematic-debugging first, then domain skills.
+
+### Domain & Implementation Skills
+
+- **Python Backend**: `python-conventions` — activates for Python backend logic, services, models, typing, docstrings, and custom exceptions (references `uv` skill).
+- **Vue / Frontend**: `vue-conventions` — activates for Vue 3, Vuetify, TypeScript, SFC block layout, script setup ordering, EasyToolTip, and themes.
+- **Python Testing**: `pytest-conventions` — activates for writing, updating, reviewing, or debugging Python tests with pytest.
 
 ## Red Flags
 

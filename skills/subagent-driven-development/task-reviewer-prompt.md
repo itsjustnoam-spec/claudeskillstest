@@ -129,6 +129,37 @@ Subagent (general-purpose):
     - Proper error handling?
     - DRY without premature abstraction?
     - Edge cases handled?
+    - **Pattern Replication:** Did the implementer search for and replicate already-existing codebase patterns rather than inventing new conventions, utilities, or abstractions?
+
+    **Domain Conventions Checklists (enforce when applicable):**
+    - **Python Backend (`python-conventions`):**
+      - Package management adheres to `uv` skill.
+      - Complete typing: parameters, variables, return types.
+      - Never write `-> None` return type; never write `return None` (use bare `return`).
+      - Docstring format: `:param:`, `:return:`, `:raises:` on consecutive lines with NO empty lines between them.
+      - Class docstrings: 3-line format (opening `"""` on line 1, description on line 2, closing `"""` on line 3).
+      - API endpoint functions: short description only, no `:param:`.
+      - Reverse proxy / redirect functions: short description only (no `:param:`, `:return:`, `:raises:`).
+      - No references to past implementations in docstrings/comments.
+      - Custom exceptions only (never Python base exceptions like `Exception` or `ValueError`).
+      - Page header with author/date; section dividers (`# ----- SECTION_NAME ----- #`) with exact spacing (imports immediately under header + 1 blank line below; consts 1 blank above/below; classes/functions 2 blank above/below).
+    - **Vue 3 / TypeScript Frontend (`vue-conventions`):**
+      - Small, focused components; `v-dialog` never root element (wrap at call site).
+      - SFC block order: `<template>` -> `<script>` -> `<style>`.
+      - Script splitting: `<script lang="ts">` for interfaces/types/constants, `<script setup lang="ts">` for component logic.
+      - `<script setup>` order: consts, defineEmits/defineProps, refs, computed, functions, watchers, onMounted.
+      - `defineEmits`: types only without parameter names (comment above if non-obvious).
+      - Shared logic/interfaces extracted to `utils/` or `models/`.
+      - Themes & styling: Vuetify theme colors used (no hardcoded colors; define new semantic theme keys for new semantic purposes). Flex/flex-1 layout (no `px` dimensions). Tailwind CSS first.
+      - UI patterns: `EasyToolTip` used (never `v-tooltip`); `mdi-information` on complex titles/dialogs. Loading indicators on async operations with debounced loading functions; `handleNetworkError` for error display.
+    - **Pytest Testing (`pytest-conventions`):**
+      - Standalone test functions (no test classes unless strictly necessary).
+      - No comments in test files unless strictly necessary.
+      - File layout: `tests/<module_name>/test_<what_we_test>.py` with module-level `conftest.py` and `utils`.
+      - AAA structure visibly separated by blank lines.
+      - Behavior test naming: `test_<unit>_<condition>_<expected>`.
+      - Fixture scoping: function default; conftest hierarchy; fixture factories; `@pytest.mark.parametrize` instead of loops.
+      - 100% test coverage for new code (pure reverse proxy redirects excepted).
 
     **Tests & Lint:**
     - Did the implementer ensure lint + tests pass cleanly at the end of the task?
