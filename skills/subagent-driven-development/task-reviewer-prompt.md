@@ -152,6 +152,7 @@ Subagent (general-purpose):
       - Shared logic/interfaces extracted to `utils/` or `models/`.
       - Themes & styling: Vuetify theme colors used (no hardcoded colors; define new semantic theme keys for new semantic purposes). Flex/flex-1 layout (no `px` dimensions). Tailwind CSS first.
       - UI patterns: `EasyToolTip` used (never `v-tooltip`); `mdi-information` on complex titles/dialogs. Loading indicators on async operations with debounced loading functions; `handleNetworkError` for error display.
+      - Condition checks: Always full/explicit checks (e.g. `=== null || === undefined`, `=== ''`, `length === 0`). NEVER loose `if (!test)` or `if (test)` on non-booleans; `if (test)` / `if (!test)` permitted only for strict boolean variables.
     - **Pytest Testing (`pytest-conventions`):**
       - Standalone test functions (no test classes unless strictly necessary).
       - No comments in test files unless strictly necessary.

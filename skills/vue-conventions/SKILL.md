@@ -183,6 +183,15 @@ onMounted(() => {
 
 ## 7. General Clean Code Standards
 
+- **Full & Explicit Checks (No Loose Falsy Checks)**:
+  - Always perform full, explicit condition checks instead of loose truthy/falsy checks.
+  - **Never** write `if (!test)` or `if (test)` on objects, strings, numbers, arrays, or nullable/optional variables.
+  - Fully check what you actually want to evaluate:
+    - Null / Undefined: `if (test === null || test === undefined)` or `if (test !== null && test !== undefined)`
+    - Empty string: `if (test === '')` or `if (test.trim().length === 0)`
+    - Empty array / collection: `if (test.length === 0)`
+    - Numeric check: `if (test === 0)` or `if (test < 0)`
+  - **Boolean Exception**: Only when a variable is strictly of type `boolean` (`true` or `false`), you may use `if (test)` or `if (!test)`.
 - **Extract Constants**: Never leave magic numbers or static string literals scattered in template or script bodies. Extract them into named constants.
 - **Indicative Variable Naming**: Use clear, descriptive variable and function names (e.g., `isUserDeletionPending`, `loadUserProfileDetails`), never generic names like `data`, `item`, or `load`.
 - **Minimal Docstrings**: Use docstrings very sparingly in frontend code — only when explaining complex mathematical logic or non-obvious third-party integrations. Clean, typed, well-named code is self-documenting.
