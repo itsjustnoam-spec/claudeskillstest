@@ -75,6 +75,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 ## Domain Guidance
 - **Python Backend**: When working on backend tasks (Python, services, APIs, models, backend utilities, scripts):
   - Always invoke and adhere to the `python-conventions` skill (`skills/python-conventions/SKILL.md`).
+  - Always run `mypy --strict` at the end of each task to verify static type correctness.
   - Do NOT load or reference frontend conventions.
 - **Python Testing**: When writing, updating, or reviewing tests in Python (`pytest`):
   - Always invoke and adhere to the `pytest-conventions` skill (`skills/pytest-conventions/SKILL.md`).

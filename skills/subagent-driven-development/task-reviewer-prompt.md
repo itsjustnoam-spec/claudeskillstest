@@ -134,8 +134,9 @@ Subagent (general-purpose):
     **Domain Conventions Checklists (enforce when applicable):**
     - **Python Backend (`python-conventions`):**
       - Package management adheres to `uv` skill.
-      - Complete typing: parameters, variables, return types.
+      - Complete typing: parameters and return types (non-None). For local variables, do NOT add redundant type annotations on obvious assignments (e.g. `count: int = 0` is bad); annotate local variables only when the type is not clear (if unsure, always add).
       - Never write `-> None` return type; never write `return None` (use bare `return`).
+      - Type check verification: Verify that `mypy --strict` passes cleanly.
       - Docstrings format: Opening `"""` and closing `"""` must ALWAYS be on their own separate lines; consecutive lines for `:param:`, `:return:`, `:raises:` with NO empty lines between them.
       - Class docstrings: 3-line format (opening `"""` on line 1, description on line 2, closing `"""` on line 3).
       - API endpoint functions: short description only, no `:param:`.

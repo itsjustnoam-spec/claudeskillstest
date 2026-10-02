@@ -8,11 +8,11 @@ If you were dispatched as a subagent to execute a specific task, ignore this ski
 </SUBAGENT-STOP>
 
 <EXTREMELY-IMPORTANT>
-If you think there is even a 1% chance a skill might apply to what you are doing, you ABSOLUTELY MUST invoke the skill.
+When a task matches a skill's purpose, invoke the skill.
 
-IF A SKILL APPLIES TO YOUR TASK, YOU DO NOT HAVE A CHOICE. YOU MUST USE IT.
+IF A SKILL APPLIES TO YOUR TASK, YOU MUST USE IT.
 
-This is not negotiable. You cannot rationalize your way out of this.
+Do not bypass applicable skills for expediency.
 </EXTREMELY-IMPORTANT>
 
 ## The Rule
@@ -29,12 +29,6 @@ When multiple skills apply, process skills come first — they set the approach,
 
 - "Let's build X" → brainstorming first, then domain skills.
 - "Fix this bug" → systematic-debugging first, then domain skills.
-
-### Domain & Implementation Skills
-
-- **Python Backend**: `python-conventions` — activates for Python backend logic, services, models, typing, docstrings, and custom exceptions (references `uv` skill).
-- **Vue / Frontend**: `vue-conventions` — activates for Vue 3, Vuetify, TypeScript, SFC block layout, script setup ordering, EasyToolTip, and themes.
-- **Python Testing**: `pytest-conventions` — activates for writing, updating, reviewing, or debugging Python tests with pytest.
 
 ## Red Flags
 

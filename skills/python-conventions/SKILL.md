@@ -17,24 +17,31 @@ For package management and dependency operations, reference and adhere to the **
 
 ## 2. Typing Guidelines
 
-- **Complete typing everywhere**:
+- **Function & Method Signatures**:
   - All function and method parameters **must** have explicit type annotations.
-  - All local variables **must** be explicitly typed (e.g., `tests: list[MyType] = [i for i in testim]`, `count: int = 0`).
   - Return types **must** be explicitly annotated for all non-None returns (e.g. `-> str`, `-> list[Item]`, `-> tuple[int, bool]`).
 - **The `None` Return Rule**:
   - If a function returns nothing or returns None, **do NOT write `-> None`**. Omit the return type annotation completely.
   - **Never write `return None`**. Always write a bare `return`.
+- **Local Variable Typing**:
+  - Do **NOT** add redundant type annotations on obvious assignments (e.g., `count: int = 0`, `name: str = "alice"`, `is_active: bool = True` is bad and unnecessary).
+  - Use type annotations on local variables **only when it is not clear what type the variable is** (e.g., empty collections like `items: list[UserRecord] = []`, complex union returns, or when initializing from untyped external returns).
+  - If you are not sure whether the type is clear, **always add the type annotation**.
+- **Static Verification**:
+  - Run `uv run mypy --strict` (or `mypy --strict`) at the end of each task to verify type correctness across all modified files.
 
 ```python
 # GOOD:
 def save_user_profile(user_id: str, email: str):
-    user_record: dict[str, str] = {"id": user_id, "email": email}
+    user_record = {"id": user_id, "email": email}  # Obvious dictionary assignment, no redundant type annotation
+    active_tokens: list[str] = []  # Empty list where type is not obvious, type annotation required
     db.insert(user_record)
     return
 
 # BAD:
-def save_user_profile(user_id, email) -> None:  # Do NOT use -> None
-    user_record = {"id": user_id, "email": email}  # Untyped variable
+def save_user_profile(user_id, email) -> None:  # Do NOT use -> None and do NOT leave parameters untyped
+    count: int = 0  # Redundant typing on obvious literal assignment
+    user_record = {"id": user_id, "email": email}
     db.insert(user_record)
     return None  # Do NOT write return None
 ```
@@ -182,4 +189,6 @@ Testing is governed by the dedicated **`pytest-conventions`** skill (`skills/pyt
 - **100% Test Coverage**: All new backend code requires 100% test coverage (pure reverse proxy redirects excepted).
 - **Test File Organization**: Mirror source in `tests/MODULE/what_we_test.py`.
 - **File Structure**: Imports straight away, then fixtures, then standalone test functions (no test classes, no comments).
-- **Execution**: Always run tests using `uv run pytest`.
+- **Execution & Type Verification**:
+  - Always run `uv run mypy --strict` (or `mypy --strict`) at the end of each task to verify complete type soundness.
+  - Always run tests using `uv run pytest`.

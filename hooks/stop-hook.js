@@ -176,27 +176,6 @@ function findActivePlan(cwd, lastMsg) {
     return { filePath: ralphPlan, source: 'ralph' };
   }
 
-  // 5. Most recently modified plan in docs/superpowers/plans/
-  const plansDir = path.join(cwd, 'docs', 'superpowers', 'plans');
-  if (fs.existsSync(plansDir)) {
-    try {
-      const files = fs.readdirSync(plansDir)
-        .filter(f => f.endsWith('.md'))
-        .map(f => {
-          const fullPath = path.join(plansDir, f);
-          const stat = fs.statSync(fullPath);
-          return { fullPath, mtime: stat.mtimeMs };
-        })
-        .sort((a, b) => b.mtime - a.mtime);
-
-      if (files.length > 0) {
-        return { filePath: files[0].fullPath, source: 'plans-dir' };
-      }
-    } catch (err) {
-      // Ignore directory read errors
-    }
-  }
-
   return null;
 }
 
