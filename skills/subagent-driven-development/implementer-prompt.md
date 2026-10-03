@@ -31,13 +31,13 @@ Subagent (general-purpose):
 
     Once you're clear on requirements:
     1. Implement exactly what the task specifies (or write new tests if this task is the final test task)
-    2. Run lint and tests at the end of the task to make sure they pass cleanly
+    2. Run lint, type check (`mypy --strict` for Python), and tests at the end of the task to make sure they pass cleanly
     3. Verify that the task's Success Predicate is satisfied
     4. Commit your work
     5. Self-review (see below)
     6. Report back
 
-    **Note on tests:** You do NOT need to write new tests on regular implementation tasks. Your responsibility is implementing the code and making sure lint and existing tests pass cleanly at the end of your task. The final task of the plan is dedicated to adding new tests.
+    **Note on tests:** You do NOT need to write new tests on regular implementation tasks. Your responsibility is implementing the code and making sure lint, type check (`mypy --strict` for Python), and existing tests pass cleanly at the end of your task. The final task of the plan is dedicated to adding new tests.
 
     Work from: [directory]
 
@@ -108,8 +108,8 @@ Subagent (general-purpose):
     - Did I only build what was requested?
     - Did I follow existing patterns in the codebase?
 
-    **Testing, Lint & Success Predicate:**
-    - Did I make sure lint + tests pass cleanly at the end of the task with pristine output?
+    **Testing, Lint, Type Check & Success Predicate:**
+    - Did I make sure lint, type check (`mypy --strict` for Python), and tests pass cleanly at the end of the task with pristine output?
     - Are there any regressions in existing functionality?
     - If this is the final test task:
       - Did I write comprehensive new tests covering all functionality, interfaces, and edge cases?
@@ -134,7 +134,7 @@ Subagent (general-purpose):
     Write your full report to [REPORT_FILE]:
     - What you implemented (or what you attempted, if blocked)
     - How the exact success predicate was satisfied (command, output, verified conditions)
-    - Confirmation that lint + tests passed cleanly at the end of the task
+    - Confirmation that lint, type check (`mypy --strict` for Python), and tests passed cleanly at the end of the task
     - What was tested and test results
     - Files changed
     - Self-review findings (if any)
