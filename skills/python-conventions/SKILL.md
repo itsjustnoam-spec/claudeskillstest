@@ -1,4 +1,4 @@
----
+﻿---
 name: python-conventions
 description: Use when creating, modifying, refactoring, or testing Python backend code. Enforces typing standards, exact docstring format, page/section headers, custom exceptions, and references the uv and pytest-conventions skills.
 ---
@@ -29,11 +29,12 @@ For package management and dependency operations, reference and adhere to the **
   - If you are not sure whether the type is clear, **always add the type annotation**.
 - **Static Verification**:
   - Run `uv run mypy --strict` (or `mypy --strict`) at the end of each task to verify type correctness across all modified files.
+  - **Ignore** mypy's "missing return type annotation" errors on functions that return None ג€” the no-`-> None` rule takes precedence. Never add `-> None` to silence mypy.
 
 ```python
 # GOOD:
 def save_user_profile(user_id: str, email: str):
-    user_record = {"id": user_id, "email": email}  # Obvious dictionary assignment, no redundant type annotation
+    user_record: dict[str, str] = {"id": user_id, "email": email}
     active_tokens: list[str] = []  # Empty list where type is not obvious, type annotation required
     db.insert(user_record)
     return
@@ -65,64 +66,28 @@ EXPLANATION ABOUT PAGE
 
 ### Section Dividers Format
 
-Section lines use the exact format:
+Section lines use the exact format, with the section name **always capitalized**:
 ```python
 # ----- SECTION_NAME ----- #
 ```
-Standard section names: `imports`, `consts`, `classes`, `functions` (and other domain-specific sections as needed, e.g. `routes`).
+Standard section names: `Imports`, `Consts`, `Classes`, `Functions` (and other domain-specific sections as needed, e.g. `Routes`). Omit sections that would be empty.
 
 ### Strict Spacing Rules
 
 1. `# ----- Imports ----- #`:
-   - Placed **immediately** after the closing `"""` of the page header (no blank lines in between).
+   - Placed **straight after the closing (2nd) `"""`** of the page docstring, on the very next line ׳’ג‚¬ג€ **0 blank lines** in between.
    - Exactly **1 blank line** below the section line before imports start.
-2. `# ----- consts ----- #`:
+2. `# ----- Consts ----- #`:
    - Exactly **1 blank line** above the section line.
    - Exactly **1 blank line** below the section line.
-3. `# ----- classes ----- #` and `# ----- functions ----- #`:
-   - Exactly **2 blank lines** above the section line.
+3. `# ----- Classes ----- #` and `# ----- Functions ----- #`:
+   - Exactly **1 blank line** above the section line.
    - Exactly **2 blank lines** below the section line.
 
-### Example File Layout
+### `__init__.py` Files
 
-```python
-"""
-User authentication and session verification service.
-
-:author: backend-team
-:date: 01/10/26
-"""
-# ----- Imports ----- #
-import os
-from typing import Optional
-
-# ----- consts ----- #
-SESSION_TIMEOUT_SECONDS: int = 3600
-MAX_LOGIN_ATTEMPTS: int = 5
-
-
-# ----- classes ----- #
-class UserAuthenticationService:
-    """
-    Handles credential checks and session token issuance.
-    """
-
-    def __init__(self, token_provider: TokenProvider):
-        self._provider: TokenProvider = token_provider
-
-
-# ----- functions ----- #
-def verify_session_token(token: str) -> bool:
-    """
-    Check session token validity against active sessions cache.
-
-    :param token: Raw session token string
-    :return: True if active and valid, False otherwise
-    :raises ExpiredSessionError: If token expired
-    """
-    is_valid: bool = cache.has(token)
-    return is_valid
-```
+- Do **NOT** define `__all__` in application packages (only acceptable in a reusable public library where restricting the interface is mandatory).
+- Omit empty banner sections.
 
 ---
 
@@ -146,17 +111,65 @@ DOCSTRING EXPLANATION
 - **No empty lines between fields**: `:param:`, `:return:`, and `:raises:` must appear on consecutive lines with zero blank lines between them.
 - **Selective docstrings**: Only write docstrings if explaining very important things or non-obvious contracts. Avoid redundant docstrings for trivial, self-explanatory code.
 - **Never mention past implementations**: Explain *why* the code works this way *now*, never what it used to do.
-- **API Endpoint Functions**: Only include a short description. Do **NOT** include `:param:`.
+- **Description Sentence**: The description is a short, concise sentence explaining what the function does, ending with a period (`.`). It must **never** mention raising errors (e.g. no "or raise an error if not found") ׳’ג‚¬ג€ exceptions are documented exclusively in `:raises:`.
+- **API Endpoint Functions**: Only the description. Do **NOT** include `:param:`, `:return:`, or `:raises:`.
 - **Reverse Proxy / Pass-Through Endpoints**: If an endpoint or function is just a reverse proxy redirecting/forwarding requests without internal business logic, omit `:param:`, `:raises:`, and `:return:`. Write only a brief single-line explanation. Full `:param:`, `:return:`, `:raises:` docstrings apply only when business logic is present.
 - **Classes & `__init__`**: Classes get a standard description with opening `"""` on line 1, description on line 2, and closing `"""` on line 3 (no `:param:` or `:return:`). `__init__` methods do **NOT** get a docstring.
 - **Indicative Naming**: Never use vague or generic names like `load` or `process`. Use explicit names that explain what is being handled (e.g., `load_customer_billing_history`, `process_credit_card_charge`).
 
 ---
 
-## 5. Custom Exceptions
+## 5. Explicit Condition Checks
+
+Never use truthy/falsy checks (`if not x:` / `if x:`) unless `x` is a genuine `bool`.
+
+- Checking for None: `if x is None:` / `if x is not None:`
+- Checking for an empty collection or string: `if len(x) == 0:` / `if len(x) > 0:`
+
+```python
+# GOOD:
+if project is None:
+    raise ProjectNotFoundError(f"Project {project_id} was not found.")
+if len(features) == 0:
+    return
+if is_active:
+    activate_session(session)
+
+# BAD:
+if not project:  # project is not a bool
+    raise ProjectNotFoundError(f"Project {project_id} was not found.")
+if not features:  # use len(features) == 0
+    return
+```
+
+---
+
+## 6. Multiline Calls
+
+- A call (function call, constructor, decorator, `raise SomeError(...)`) **must** put each argument on its own line, with a trailing comma, when:
+  - It has **3 or more arguments**, **or**
+  - The line's content (excluding leading indentation) is **50+ characters** long.
+- Otherwise keep it on a single line.
+
+```python
+# GOOD:
+session.add(record)
+raise HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND,
+    detail=str(error),
+)
+
+# BAD:
+raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
+```
+
+---
+
+## 7. Custom Exceptions
 
 - **Never raise Python base exceptions** (`Exception`, `ValueError`, `KeyError`, `RuntimeError`, etc.).
 - Always define and raise custom application exceptions that clearly represent the domain failure.
+- Custom exception class names **must** end with `Error` (e.g. `NotFoundError`, `DatabaseTransactionError`, never `NotFound`).
 
 ```python
 # GOOD:
@@ -181,7 +194,7 @@ def fetch_user_by_id(user_id: str) -> UserRecord:
 
 ---
 
-## 6. Testing Conventions (`pytest`)
+## 8. Testing Conventions (`pytest`)
 
 Testing is governed by the dedicated **`pytest-conventions`** skill (`skills/pytest-conventions/SKILL.md`). Whenever writing, refactoring, or reviewing tests for Python backend code:
 
