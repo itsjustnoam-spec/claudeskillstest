@@ -33,7 +33,7 @@ Subagent (general-purpose):
     1. Implement exactly what the task specifies (or write new tests if this task is the final test task)
     2. Run lint, type check (`mypy --strict` for Python), and tests at the end of the task to make sure they pass cleanly
     3. Verify that the task's Success Predicate is satisfied
-    4. Commit your work
+    4. Commit your work (preferably using indicative messages such as `ACTION(MICROSERVICE TOUCHED, SPLIT BY ,): WHAT HAS WAS CHANGED IN SHORT`, e.g. `feat(evermore): allow filtering jobs by projects`)
     5. Self-review (see below)
     6. Report back
 

@@ -11,7 +11,7 @@ Write implementation plans for an engineer who has not seen this codebase or thi
 
 **Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
 
-**Context:** If working in an isolated worktree, it should have been created via the `superpowers:using-git-worktrees` skill at execution time.
+**Context:** If working in an isolated worktree, it should have been created via the `using-git-worktrees` skill at execution time.
 
 **Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
 - (User preferences for plan location override this default)
@@ -53,6 +53,18 @@ edge cases implemented across Tasks 1..N-1. For Python projects, this task
 must explicitly invoke and adhere to `pytest-conventions` (100%
 coverage, AAA structure, parametrization, fixture factories, and isolation).
 
+**Final Review Checkbox:**
+After the final test task, every plan MUST end with this exact section. It is
+not an implementer task — the controller ticks it after the whole-branch
+review subagent (branch-code-review) returns a clean verdict. The
+stop hook will not let the session end until it is checked.
+
+```markdown
+## Final Review
+
+- [ ] Final whole-branch review: clean
+```
+
 ## Exact Success Predicates
 
 Every task in a generated plan must include an exact success predicate: a single quantified, checkable completion condition.
@@ -86,7 +98,7 @@ For the final test task:
 ```markdown
 # [Feature Name] Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use subagent-driven-development to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** [One sentence describing what this builds]
 
@@ -150,7 +162,7 @@ Expected: 0 lint errors, all existing tests pass
 
 ```bash
 git add src/path/file.py
-git commit -m "feat: implement specific feature"
+git commit -m "feat(service): implement specific feature"
 ```
 ````
 
@@ -188,7 +200,7 @@ Expected: All tests pass, 0 lint errors
 
 ```bash
 git add tests/path/test.py
-git commit -m "test: add unit and integration tests for [feature name]"
+git commit -m "test(service): add unit and integration tests for [feature name]"
 ```
 ````
 
@@ -233,6 +245,8 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 
 **7. Final Test Task:** Is the latest task in the plan dedicated to adding new tests covering the newly implemented features and edge cases, while earlier tasks focus on implementation and verifying lint + existing tests pass?
 
+**8. Final Review:** Does the plan end with the `## Final Review` section containing the unchecked `- [ ] Final whole-branch review: clean` line?
+
 If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
 
 ## Execution Handoff
@@ -242,4 +256,4 @@ to read. Always select subagent-driven development as the execution method.
 
 **"Plan complete and saved to `docs/superpowers/plans/<filename>.md`. Proceeding with execution using subagent-driven development."**
 
-- **REQUIRED SUB-SKILL:** Use superpowers:subagent-driven-development
+- **REQUIRED SUB-SKILL:** Use subagent-driven-development

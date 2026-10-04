@@ -42,7 +42,7 @@ Or configure Claude Code plugin settings pointing to this directory.
 2. **using-git-worktrees** — Activates after design approval. Creates an isolated workspace on a new branch with a clean baseline.
 3. **writing-plans** — Breaks designs into bite-sized tasks with explicit verification steps. Automatically executed after design approval and always selects subagent-driven development.
 4. **subagent-driven-development** — Dispatches fresh subagents per task with two-stage reviews.
-5. **requesting-code-review** & **receiving-code-review** — Pre-review verification and structured feedback incorporation.
+5. **branch-code-review** & **receiving-code-review** — Checklist-based whole-branch review and structured feedback incorporation.
 6. **systematic-debugging** — 4-phase root cause process (investigate, hypothesize, test, fix).
 7. **verification-before-completion** — Verifies evidence before declaring completion.
 8. **finishing-a-development-branch** — Merge, PR, or branch cleanup decisions.
@@ -52,10 +52,10 @@ Or configure Claude Code plugin settings pointing to this directory.
 ## Skills Included
 
 * **Domain & Conventions**: `python-conventions`, `vue-conventions`
-* **Testing & Quality**: `pytest-conventions`, `verification-before-completion`
+* **Testing & Quality**: `branch-code-review`, `pytest-conventions`, `verification-before-completion`
 * **Debugging**: `systematic-debugging`
-* **Collaboration & Execution**: `brainstorming`, `using-git-worktrees`, `writing-plans`, `executing-plans`, `subagent-driven-development`, `requesting-code-review`, `receiving-code-review`, `finishing-a-development-branch`, `dispatching-parallel-agents`, `gitlab-mr-review`
-* **Meta**: `using-superpowers`, `writing-skills`
+* **Collaboration & Execution**: `brainstorming`, `using-git-worktrees`, `writing-plans`, `executing-plans`, `subagent-driven-development`, `receiving-code-review`, `finishing-a-development-branch`, `dispatching-parallel-agents`, `gitlab-mr-review`
+* **Meta & Continuous Learning**: `using-superpowers`, `writing-skills`, `code-reviews-analyzer`
 
 ---
 

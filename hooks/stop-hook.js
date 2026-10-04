@@ -115,7 +115,26 @@ function main() {
     return;
   }
 
-  // Case C: All non-optional tasks are complete!
+  // Case C: All non-optional tasks are complete, but the final whole-branch
+  // review has not been recorded in the plan. Block so the agent dispatches
+  // the reviewer subagent before finishing. Plans found only via the
+  // "most recent plan" fallback are skipped when stale, so finished
+  // historical plans don't gate every stop.
+  if (!taskAnalysis.finalReviewDone && !isStaleFallbackPlan(planInfo)) {
+    blockExit(
+      cwd,
+      planPath,
+      relativePlanPath,
+      taskAnalysis,
+      `All tasks in ${relativePlanPath} are complete, but no final whole-branch review is recorded. ` +
+        `Use branch-code-review to dispatch a reviewer subagent over the full branch diff ` +
+        `(git merge-base <base> HEAD..HEAD). Address Critical/Important findings, then append ` +
+        `"- [x] Final whole-branch review: clean" to the plan.`
+    );
+    return;
+  }
+
+  // Case D: All non-optional tasks and the final review are complete!
   // Clear any existing circuit breaker state
   clearCircuitBreakerState(cwd);
   process.exit(0);
@@ -268,8 +287,27 @@ function analyzePlanTasks(planPath) {
     hasTasks: totalTasks > 0,
     incompleteTasks,
     completedTasks,
-    optionalTasks
+    optionalTasks,
+    finalReviewDone: completedTasks.some(t => FINAL_REVIEW_PATTERN.test(t.text))
   };
+}
+
+// A checked task like "- [x] Final whole-branch review: clean" records that
+// the end-of-plan re-review subagent ran.
+const FINAL_REVIEW_PATTERN = /final\s+(?:whole[- ]branch\s+|code\s+)?review/i;
+
+// Plans picked up only by the "most recent file in docs/superpowers/plans"
+// fallback are treated as stale (not actively executing) once untouched for
+// this long.
+const STALE_FALLBACK_PLAN_MS = 60 * 60 * 1000;
+
+function isStaleFallbackPlan(planInfo) {
+  if (planInfo.source !== 'plans-dir') return false;
+  try {
+    return Date.now() - fs.statSync(planInfo.filePath).mtimeMs > STALE_FALLBACK_PLAN_MS;
+  } catch (err) {
+    return true;
+  }
 }
 
 /**

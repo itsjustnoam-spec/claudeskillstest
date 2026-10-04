@@ -49,11 +49,11 @@ those, stop and ask.
   `../using-superpowers/references/`). Never fabricate a dispatch; run
   the plan here.
 - Tasks are mostly independent — the same precondition as
-  superpowers:subagent-driven-development.
+  subagent-driven-development.
 
 A fully specified plan makes inline execution transcription plus testing. Tell your human partner so when they choose inline.
 
-Prefer superpowers:subagent-driven-development when your human partner
+Prefer subagent-driven-development when your human partner
 wants a review gate on every task, or when the plan is long enough that
 its later tasks would run on a compacted context. Inline execution over a
 long plan still works — the ledger is what makes it recoverable — but the
@@ -81,7 +81,7 @@ digraph process {
     "Final whole-branch review (fresh reviewer if you have one)" [shape=box];
     "Re-grade, then: Critical/Important → ONE fix pass, each fix verified + green suite; Minor → ledger" [shape=box];
     "Final review clean: delete this plan's workspace" [shape=box];
-    "Use superpowers:finishing-a-development-branch" [shape=box style=filled fillcolor=lightgreen];
+    "Use finishing-a-development-branch" [shape=box style=filled fillcolor=lightgreen];
 
     "Setup: worktree, workspace + ledger, read plan + spec, pre-flight scan" -> "task-start: brief + BASE; read the brief";
     "task-start: brief + BASE; read the brief" -> "Work the steps in order: run every verification, read every output";
@@ -97,14 +97,14 @@ digraph process {
     "More tasks remain?" -> "Final whole-branch review (fresh reviewer if you have one)" [label="no"];
     "Final whole-branch review (fresh reviewer if you have one)" -> "Re-grade, then: Critical/Important → ONE fix pass, each fix verified + green suite; Minor → ledger";
     "Re-grade, then: Critical/Important → ONE fix pass, each fix verified + green suite; Minor → ledger" -> "Final review clean: delete this plan's workspace";
-    "Final review clean: delete this plan's workspace" -> "Use superpowers:finishing-a-development-branch";
+    "Final review clean: delete this plan's workspace" -> "Use finishing-a-development-branch";
 }
 ```
 
 ## Setup
 
 Ensure the work happens in an isolated workspace: use
-superpowers:using-git-worktrees to create one or verify the existing one.
+using-git-worktrees to create one or verify the existing one.
 Never start implementation on a main/master branch without your human
 partner's explicit consent.
 
@@ -114,7 +114,7 @@ failure as a controller re-dispatching them, paid for in your own context.
 Track progress in a ledger file, not only in todos. Harness todos are a
 live view; the ledger is the record.
 
-The workspace and ledger are shared with superpowers:subagent-driven-development
+The workspace and ledger are shared with subagent-driven-development
 — same directory, same format — so a plan can change executors mid-flight
 and the new one resumes from the same ledger.
 
@@ -182,7 +182,7 @@ Every step that runs a command has an `Expected:` line. Run the command,
 read its output, and compare. Three outcomes:
 
 - **Matches.** Next step.
-- **The code is wrong.** Use superpowers:systematic-debugging. Find the
+- **The code is wrong.** Use systematic-debugging. Find the
   cause; never patch the symptom to make the step's output match.
 - **The plan is wrong** — a step contradicts the spec, an interface from an
   earlier task doesn't match what this task consumes, a command that
@@ -210,7 +210,7 @@ in this session — not inferred from the diff looking right:
   branches, no vacuous test assertions).
 - Every deviation from the brief has a `Ruling:` line in the ledger.
 
-**REQUIRED SUB-SKILL:** superpowers:verification-before-completion governs
+**REQUIRED SUB-SKILL:** verification-before-completion governs
 the claim. If any item is missing, the task is not complete: finish it.
 
 ### 4. Complete the task
@@ -232,22 +232,25 @@ Run `../subagent-driven-development/scripts/review-package PLAN_FILE MERGE_BASE 
 `git merge-base main HEAD`) and review from the file it prints.
 
 **With a subagent tool:** dispatch the reviewer — the whole-branch review is a judgment task — using
-superpowers:requesting-code-review's
-[code-reviewer.md](../requesting-code-review/code-reviewer.md), with the
-package path, the plan and spec paths, the plan's Review Focus section
+branch-code-review's
+[reviewer-prompt.md](../branch-code-review/reviewer-prompt.md), with the
+package path, the rules checklist path ([`rules.md`](../branch-code-review/rules.md)),
+active domain conventions, the plan and spec paths, the plan's Review Focus section
 verbatim if it has one (the input classes and failure modes the plan's
 tests do not exercise — the reviewer checks each deliberately), and a
 pointer to the ledger's `Ruling:` lines so it can weigh the calls you
-made.
- This is the one fresh context the whole run buys. Do not
+made. This is the one fresh context the whole run buys. Do not
 skip it, and do not replace it with your own read of the diff.
 
-**Without a subagent tool:** read code-reviewer.md and perform that review
+**Without a subagent tool:** read [`rules.md`](../branch-code-review/rules.md) and perform that checklist review
 yourself against the package, as a separate pass after the last task's
 ledger line. Write `Final review: self-review (no subagent tool)` to the
 ledger, and say so in your final message: a self-review by the author is
 weaker than a fresh reviewer, and your human partner decides whether that
 is enough before merge.
+
+When the review is clean (or findings addressed), tick
+`- [x] Final whole-branch review: clean` in the plan's `## Final Review` section.
 
 Sort the findings before you act on any of them. The reviewer's severity
 labels are advice; the gate is yours. Its "Declined to judge" list is
@@ -292,7 +295,7 @@ When the final review is clean and its fixes are committed, delete this
 plan's workspace directory — the git history is the record now. Sibling
 directories belong to other plans; leave them alone.
 
-Use superpowers:finishing-a-development-branch.
+Use finishing-a-development-branch.
 
 ## Common Rationalizations
 
@@ -345,7 +348,7 @@ Task 2: Recovery modes
 
 ...
 
-[After all tasks: review-package plan MERGE_BASE HEAD; dispatch code-reviewer]
+[After all tasks: review-package plan MERGE_BASE HEAD; dispatch branch-code-review]
 Reviewer: One Important finding — progress reporting interval hardcoded. Two Minor.
 [Re-grade: Important stands; minors → ledger as deferred]
 [Fix pass: test_progress_interval_configurable RED → extract PROGRESS_INTERVAL → GREEN; suite 12/12; commit]
@@ -360,5 +363,5 @@ Deferred minors:
 
 [Delete this plan's workspace — the record now lives in git]
 
-Using superpowers:finishing-a-development-branch.
+Using finishing-a-development-branch.
 ```

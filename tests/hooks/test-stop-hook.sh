@@ -107,22 +107,70 @@ else
     fail "Incomplete tasks in plan trigger decision: block with next task preview"
 fi
 
-# 6. Plan with all non-optional tasks completed allows exit
+# 6. Plan with all non-optional tasks and final review completed allows exit
 complete_proj="$(make_project complete_proj)"
 mkdir -p "$complete_proj/docs/superpowers/plans"
 cat << 'PLAN' > "$complete_proj/docs/superpowers/plans/feature.md"
 # Feature Plan
 - [x] Step 1: Completed step
 - [x] Step 2: Another completed step
+- [x] Final whole-branch review: clean
 PLAN
 
 payload=$(node -e 'console.log(JSON.stringify({stop_hook_active: false, cwd: process.argv[1], last_assistant_message: "All done!"}));' "$complete_proj")
 output=$(printf '%s' "$payload" | bash "$HOOK_UNDER_TEST" 2>&1)
 
 if [[ -z "$output" ]]; then
-    pass "All completed tasks in plan allow normal exit"
+    pass "All completed tasks plus final review allow normal exit"
 else
-    fail "All completed tasks in plan allow normal exit (got output: $output)"
+    fail "All completed tasks plus final review allow normal exit (got output: $output)"
+fi
+
+# 6b. All tasks complete but no final review recorded blocks exit
+noreview_proj="$(make_project noreview_proj)"
+mkdir -p "$noreview_proj/docs/superpowers/plans"
+cat << 'PLAN' > "$noreview_proj/docs/superpowers/plans/feature.md"
+# Feature Plan
+- [x] Step 1: Completed step
+- [x] Step 2: Another completed step
+PLAN
+
+payload=$(node -e 'console.log(JSON.stringify({stop_hook_active: false, cwd: process.argv[1], last_assistant_message: "All done!"}));' "$noreview_proj")
+output=$(printf '%s' "$payload" | bash "$HOOK_UNDER_TEST" 2>&1)
+
+if printf '%s' "$output" | node -e '
+const fs = require("fs");
+const data = JSON.parse(fs.readFileSync(0, "utf8"));
+if (data.decision !== "block") {
+  console.error("Expected decision: block, got: " + data.decision);
+  process.exit(1);
+}
+if (!data.reason.includes("branch-code-review")) {
+  console.error("Reason did not point at branch-code-review: " + data.reason);
+  process.exit(1);
+}
+'; then
+    pass "Completed plan without final review blocks exit and requests branch review"
+else
+    fail "Completed plan without final review blocks exit and requests branch review"
+fi
+
+# 6c. Stale fallback plan without final review does not block exit
+stale_proj="$(make_project stale_proj)"
+mkdir -p "$stale_proj/docs/superpowers/plans"
+cat << 'PLAN' > "$stale_proj/docs/superpowers/plans/old.md"
+# Old Plan
+- [x] Step 1: Completed long ago
+PLAN
+touch -d '2 hours ago' "$stale_proj/docs/superpowers/plans/old.md"
+
+payload=$(node -e 'console.log(JSON.stringify({stop_hook_active: false, cwd: process.argv[1], last_assistant_message: "Hello"}));' "$stale_proj")
+output=$(printf '%s' "$payload" | bash "$HOOK_UNDER_TEST" 2>&1)
+
+if [[ -z "$output" ]]; then
+    pass "Stale fallback plan without final review allows normal exit"
+else
+    fail "Stale fallback plan without final review allows normal exit (got output: $output)"
 fi
 
 # 7. Unchecked tasks under optional sections do not block exit
@@ -132,6 +180,7 @@ cat << 'PLAN' > "$optional_proj/docs/superpowers/plans/feature.md"
 # Feature Plan
 - [x] Step 1: Completed step
 - [x] Step 2: Another completed step
+- [x] Final whole-branch review: clean
 
 ## Optional
 - [ ] Optional Step: Nice to have extra

@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# Generate a whole-branch review package: commit list, changed paths, stat
+# summary, and the net diff with extended context, written to one file the
+# reviewer reads in a single call.
+#
+# Usage: branch-package [BASE_REF] [OUTFILE]
+#   BASE_REF  branch the work forked from (default: origin/HEAD, then main, then master)
+#   OUTFILE   default: <repo-root>/.superpowers/branch-review/review-<base7>..<head7>.diff
+set -euo pipefail
+
+if [ $# -gt 2 ]; then
+  echo "usage: branch-package [BASE_REF] [OUTFILE]" >&2
+  exit 2
+fi
+
+base_ref=${1:-}
+if [ -z "$base_ref" ]; then
+  for candidate in origin/HEAD origin/main origin/master main master; do
+    if git rev-parse --verify --quiet "$candidate" >/dev/null; then
+      base_ref=$candidate
+      break
+    fi
+  done
+fi
+[ -n "$base_ref" ] || { echo "could not detect a base branch; pass BASE_REF" >&2; exit 2; }
+git rev-parse --verify --quiet "$base_ref" >/dev/null || { echo "bad BASE_REF: $base_ref" >&2; exit 2; }
+
+base=$(git merge-base "$base_ref" HEAD)
+head=$(git rev-parse HEAD)
+
+# Range guard (exit 3): an empty range means HEAD is the base branch itself
+# or the work is not committed yet.
+[ "$(git rev-list --count "${base}..${head}")" -gt 0 ] || {
+  echo "empty commit range ${base_ref}...HEAD — nothing committed on this branch" >&2
+  exit 3
+}
+
+if [ $# -eq 2 ]; then
+  out=$2
+else
+  dir="$(git rev-parse --show-toplevel)/.superpowers/branch-review"
+  mkdir -p "$dir"
+  out="$dir/review-$(git rev-parse --short "$base")..$(git rev-parse --short "$head").diff"
+fi
+
+{
+  echo "# Branch review package: ${base_ref} (merge-base ${base}) .. HEAD ${head}"
+  echo
+  echo "## Commits"
+  git log --oneline "${base}..${head}"
+  echo
+  echo "## Changed paths"
+  git diff --name-only "${base}..${head}"
+  echo
+  echo "## Files changed"
+  git diff --stat "${base}..${head}"
+  echo
+  echo "## Diff"
+  git diff -U10 "${base}..${head}"
+} > "$out"
+
+if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
+  echo "warning: tracked files have uncommitted changes; they are NOT in the package" >&2
+fi
+
+commits=$(git rev-list --count "${base}..${head}")
+echo "wrote ${out}: ${commits} commit(s), $(wc -c < "$out" | tr -d ' ') bytes"
