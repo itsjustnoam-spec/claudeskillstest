@@ -50,7 +50,7 @@ Honor any existing declared preference without asking. If the user declines cons
 
 ### 1a. Native Worktree Tools (preferred)
 
-The user has asked for an isolated workspace (Step 0 consent). Do you already have a way to create a worktree? It might be a tool with a name like `EnterWorktree`, `WorktreeCreate`, a `/worktree` command, or a `--worktree` flag. If you do, use it and skip to Step 2.
+The user has asked for an isolated workspace (Step 0 consent). Do you already have a way to create a worktree? It might be a tool with a name like `EnterWorktree`, `WorktreeCreate`, a `/worktree` command, or a `--worktree` flag. If you do, use it and proceed to Step 1c.
 
 Native tools handle directory placement, branch creation, and cleanup automatically. Using `git worktree add` when you have a native tool creates phantom state your harness can't see or manage.
 
@@ -99,6 +99,16 @@ cd "$path"
 
 **Sandbox fallback:** If `git worktree add` fails with a permission error (sandbox denial), tell the user the sandbox blocked worktree creation and you're working in the current directory instead. Then run setup and baseline tests in place.
 
+### 1c. Post-Creation Hook: Update Knowledge Graph
+
+Immediately after creating and entering the worktree (via either native tools or git fallback), run `graphify update` to ensure the workspace's knowledge graph index is synchronized with the branch:
+
+```bash
+if command -v graphify >/dev/null 2>&1; then
+  graphify update
+fi
+```
+
 ## Step 2: Project Setup
 
 Auto-detect and run appropriate setup:
@@ -145,8 +155,9 @@ Ready to implement <feature-name>
 |-----------|--------|
 | Already in linked worktree | Skip creation (Step 0) |
 | In a submodule | Treat as normal repo (Step 0 guard) |
-| Native worktree tool available | Use it (Step 1a) |
-| No native tool | Git worktree fallback (Step 1b) |
+| Native worktree tool available | Use it (Step 1a), run post-hook (Step 1c) |
+| No native tool | Git worktree fallback (Step 1b), run post-hook (Step 1c) |
+| Worktree created / entered | Run `graphify update` post-hook (Step 1c) |
 | `.worktrees/` exists | Use it (verify ignored) |
 | `worktrees/` exists | Use it (verify ignored) |
 | Both exist | Use `.worktrees/` |
