@@ -133,6 +133,9 @@ and the new one resumes from the same ledger.
   another plan's progress: leave it and start your own, fresh.
 - Create the ledger with its identity as the first line:
   `# SDD ledger — plan: <plan file path>`.
+- Register the plan with the Stop hook:
+  `bash ../subagent-driven-development/scripts/plan-active start PLAN_FILE`
+  (from the worktree you execute in). Unregistered runs are never held open.
 - `git clean -fdx` will destroy the workspace (it's git-ignored scratch);
   if that happens, recover from `git log`.
 
