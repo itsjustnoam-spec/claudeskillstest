@@ -147,6 +147,9 @@ a ledger file, not only in todos.
   plan's progress: leave it in place and start your own, fresh.
 - Create the ledger with its identity as the first line:
   `# SDD ledger — plan: <plan file path>`.
+- Register the plan with the Stop hook: `bash scripts/plan-active start PLAN_FILE`.
+  Only a registered plan keeps the session running until it is done; run it
+  from the worktree you execute in so the hook reads that copy of the plan.
 - The ledger is your recovery map: the commits it names exist in git even
   when your context no longer remembers creating them. After compaction,
   trust the ledger and `git log` over your own recollection.

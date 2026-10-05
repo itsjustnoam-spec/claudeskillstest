@@ -6,10 +6,16 @@
  * - Intercepts premature stops during active plan execution
  * - Circuit breaker protection against infinite loops
  * - Respects stop_hook_active and manual block/clarification escalations
+ *
+ * Gating is opt-in: the hook only acts when THIS session registered a plan
+ * via an active-plan marker (see active-plan.js) or PLAN_FILE is set. It never
+ * guesses from plan files lying around, so runs without a plan and git
+ * worktrees behave correctly.
  */
 
 const fs = require('fs');
 const path = require('path');
+const activePlan = require('./active-plan');
 
 function normalizePath(p) {
   if (!p) return p;
@@ -76,10 +82,9 @@ function main() {
     process.exit(0);
   }
 
-  // 5. Locate active plan
-  const planInfo = findActivePlan(cwd, lastMsg);
-  if (!planInfo || !planInfo.filePath || !fs.existsSync(planInfo.filePath)) {
-    // No active plan found; allow normal exit
+  // 5. Locate this session's active plan (opt-in only)
+  const planInfo = findActivePlan(cwd, payload.session_id || '');
+  if (!planInfo) {
     process.exit(0);
   }
 
@@ -89,7 +94,6 @@ function main() {
   // 6. Parse plan tasks and checkboxes
   const taskAnalysis = analyzePlanTasks(planPath);
   if (!taskAnalysis.hasTasks) {
-    // The file has no task checkboxes; not an active checklist plan
     process.exit(0);
   }
 
@@ -99,15 +103,14 @@ function main() {
   // 8. Dual-Condition Exit Gate Evaluation
   // Case A: Claude explicitly emitted EXIT_SIGNAL: false (work in progress)
   if (exitSignal === false) {
-    blockExit(cwd, planPath, relativePlanPath, taskAnalysis, "Agent reported 'EXIT_SIGNAL: false' (work in progress).");
+    blockExit(planInfo, relativePlanPath, taskAnalysis, "Agent reported 'EXIT_SIGNAL: false' (work in progress).");
     return;
   }
 
   // Case B: Incomplete non-optional tasks remain
   if (taskAnalysis.incompleteTasks.length > 0) {
     blockExit(
-      cwd,
-      planPath,
+      planInfo,
       relativePlanPath,
       taskAnalysis,
       `${taskAnalysis.incompleteTasks.length} non-optional task(s) remain incomplete in ${relativePlanPath}.`
@@ -116,14 +119,10 @@ function main() {
   }
 
   // Case C: All non-optional tasks are complete, but the final whole-branch
-  // review has not been recorded in the plan. Block so the agent dispatches
-  // the reviewer subagent before finishing. Plans found only via the
-  // "most recent plan" fallback are skipped when stale, so finished
-  // historical plans don't gate every stop.
-  if (!taskAnalysis.finalReviewDone && !isStaleFallbackPlan(planInfo)) {
+  // review has not been recorded in the plan.
+  if (!taskAnalysis.finalReviewDone) {
     blockExit(
-      cwd,
-      planPath,
+      planInfo,
       relativePlanPath,
       taskAnalysis,
       `All tasks in ${relativePlanPath} are complete, but no final whole-branch review is recorded. ` +
@@ -134,88 +133,30 @@ function main() {
     return;
   }
 
-  // Case D: All non-optional tasks and the final review are complete!
-  // Clear any existing circuit breaker state
-  clearCircuitBreakerState(cwd);
+  // Case D: All non-optional tasks and the final review are complete — release the plan.
+  releasePlan(planInfo);
   process.exit(0);
 }
 
 /**
- * Locate active plan file across standard locations
+ * The plan this session is executing, or null. Sources, in order:
+ * 1. PLAN_FILE / RALPH_PLAN environment variable (manual override)
+ * 2. An active-plan marker owned by (or claimable by) this session
  */
-function findActivePlan(cwd, lastMsg) {
-  // 1. Explicit environment variable
+function findActivePlan(cwd, sessionId) {
   const envPlan = process.env.PLAN_FILE || process.env.RALPH_PLAN;
   if (envPlan) {
     const normEnv = normalizePath(envPlan);
     const resolved = path.isAbsolute(normEnv) ? normEnv : path.join(cwd, normEnv);
     if (fs.existsSync(resolved)) {
-      return { filePath: resolved, source: 'env' };
+      return { filePath: resolved, source: 'env', breaker: null };
     }
   }
 
-  // 2. Mentioned in last assistant message
-  const matchMention = lastMsg.match(/(?:docs\/superpowers\/plans\/|\.ralph\/)[a-zA-Z0-9_\-\./]+\.md/i);
-  if (matchMention) {
-    const mentionedPath = path.join(cwd, matchMention[0]);
-    if (fs.existsSync(mentionedPath)) {
-      return { filePath: mentionedPath, source: 'message' };
-    }
+  const marker = activePlan.findSessionMarker(cwd, sessionId);
+  if (marker) {
+    return { filePath: marker.data.plan, source: 'marker', marker, breaker: marker.data.breaker || null };
   }
-
-  // 3. Subagent-Driven Development (SDD) ledger under .superpowers/sdd/
-  const sddDir = path.join(cwd, '.superpowers', 'sdd');
-  if (fs.existsSync(sddDir)) {
-    try {
-      const entries = fs.readdirSync(sddDir, { withFileTypes: true });
-      for (const entry of entries) {
-        if (entry.isDirectory()) {
-          const progressFile = path.join(sddDir, entry.name, 'progress.md');
-          if (fs.existsSync(progressFile)) {
-            const firstLine = fs.readFileSync(progressFile, 'utf8').split('\n')[0] || '';
-            const ledgerMatch = firstLine.match(/# SDD ledger — plan:\s*(.+)$/i);
-            if (ledgerMatch && ledgerMatch[1]) {
-              const ledgerPlan = normalizePath(ledgerMatch[1].trim());
-              const resolved = path.isAbsolute(ledgerPlan) ? ledgerPlan : path.join(cwd, ledgerPlan);
-              if (fs.existsSync(resolved)) {
-                return { filePath: resolved, source: 'sdd-ledger' };
-              }
-            }
-          }
-        }
-      }
-    } catch (err) {
-      // Ignore directory read errors
-    }
-  }
-
-  // 4. Ralph fix_plan.md (.ralph/fix_plan.md)
-  const ralphPlan = path.join(cwd, '.ralph', 'fix_plan.md');
-  if (fs.existsSync(ralphPlan)) {
-    return { filePath: ralphPlan, source: 'ralph' };
-  }
-
-  // 5. Most recently modified plan in docs/superpowers/plans/
-  const plansDir = path.join(cwd, 'docs', 'superpowers', 'plans');
-  if (fs.existsSync(plansDir)) {
-    try {
-      const files = fs.readdirSync(plansDir)
-        .filter(f => f.endsWith('.md'))
-        .map(f => {
-          const fullPath = path.join(plansDir, f);
-          const stat = fs.statSync(fullPath);
-          return { fullPath, mtime: stat.mtimeMs };
-        })
-        .sort((a, b) => b.mtime - a.mtime);
-
-      if (files.length > 0) {
-        return { filePath: files[0].fullPath, source: 'plans-dir' };
-      }
-    } catch (err) {
-      // Ignore directory read errors
-    }
-  }
-
   return null;
 }
 
@@ -296,27 +237,12 @@ function analyzePlanTasks(planPath) {
 // the end-of-plan re-review subagent ran.
 const FINAL_REVIEW_PATTERN = /final\s+(?:whole[- ]branch\s+|code\s+)?review/i;
 
-// Plans picked up only by the "most recent file in docs/superpowers/plans"
-// fallback are treated as stale (not actively executing) once untouched for
-// this long.
-const STALE_FALLBACK_PLAN_MS = 60 * 60 * 1000;
-
-function isStaleFallbackPlan(planInfo) {
-  if (planInfo.source !== 'plans-dir') return false;
-  try {
-    return Date.now() - fs.statSync(planInfo.filePath).mtimeMs > STALE_FALLBACK_PLAN_MS;
-  } catch (err) {
-    return true;
-  }
-}
-
 /**
  * Extract EXIT_SIGNAL from last assistant message
  */
 function extractExitSignal(lastMsg) {
   if (!lastMsg) return null;
 
-  // Match ---RALPH_STATUS--- or RALPH_STATUS: block or inline EXIT_SIGNAL
   const exitSigMatch = lastMsg.match(/EXIT_SIGNAL:\s*(true|false)/i);
   if (exitSigMatch) {
     return exitSigMatch[1].toLowerCase() === 'true';
@@ -329,80 +255,48 @@ function extractExitSignal(lastMsg) {
   return null;
 }
 
-/**
- * State path for circuit breaker
- */
-function getStateFilePath(cwd) {
-  const dir = path.join(cwd, '.superpowers');
-  if (!fs.existsSync(dir)) {
-    try {
-      fs.mkdirSync(dir, { recursive: true });
-    } catch (err) {}
-  }
-  return path.join(dir, '.stop_hook_state.json');
+/** Stop gating this plan: delete its marker (env-provided plans have none). */
+function releasePlan(planInfo) {
+  if (planInfo.marker) activePlan.removeMarker(planInfo.marker.file);
 }
 
-function clearCircuitBreakerState(cwd) {
-  const statePath = getStateFilePath(cwd);
-  if (fs.existsSync(statePath)) {
-    try {
-      fs.unlinkSync(statePath);
-    } catch (err) {}
-  }
+/** Persist circuit-breaker state inside the session's marker. */
+function saveBreaker(planInfo, breaker) {
+  if (!planInfo.marker) return;
+  planInfo.marker.data.breaker = breaker;
+  planInfo.marker.data.updatedAt = Date.now();
+  try {
+    activePlan.writeMarker(planInfo.marker.file, planInfo.marker.data);
+  } catch (err) {}
 }
 
 /**
  * Check circuit breaker and output decision: "block" if safe
  */
-function blockExit(cwd, planPath, relativePlanPath, taskAnalysis, summaryReason) {
-  const statePath = getStateFilePath(cwd);
-  let state = {
-    planFile: planPath,
-    consecutiveBlocks: 0,
+function blockExit(planInfo, relativePlanPath, taskAnalysis, summaryReason) {
+  const prev = planInfo.breaker || {};
+  const madeProgress =
+    taskAnalysis.completedTasks.length > (prev.lastCompletedCount || 0) ||
+    taskAnalysis.incompleteTasks.length < (prev.lastIncompleteCount ?? Infinity);
+
+  const breaker = {
+    consecutiveBlocks: madeProgress ? 1 : (prev.consecutiveBlocks || 0) + 1,
     lastIncompleteCount: taskAnalysis.incompleteTasks.length,
     lastCompletedCount: taskAnalysis.completedTasks.length
   };
 
-  if (fs.existsSync(statePath)) {
-    try {
-      const parsed = JSON.parse(fs.readFileSync(statePath, 'utf8'));
-      if (parsed.planFile === planPath) {
-        state = parsed;
-      }
-    } catch (err) {}
-  }
-
-  // Check progress
-  const madeProgress =
-    taskAnalysis.completedTasks.length > (state.lastCompletedCount || 0) ||
-    taskAnalysis.incompleteTasks.length < (state.lastIncompleteCount || Infinity);
-
-  if (madeProgress) {
-    state.consecutiveBlocks = 1;
-  } else {
-    state.consecutiveBlocks = (state.consecutiveBlocks || 0) + 1;
-  }
-
-  state.lastIncompleteCount = taskAnalysis.incompleteTasks.length;
-  state.lastCompletedCount = taskAnalysis.completedTasks.length;
-  state.updatedAt = Date.now();
-
   // Circuit breaker: Force exit after 5 consecutive blocks without progress
   const MAX_CONSECUTIVE_BLOCKS = 5;
-  if (state.consecutiveBlocks >= MAX_CONSECUTIVE_BLOCKS) {
+  if (breaker.consecutiveBlocks >= MAX_CONSECUTIVE_BLOCKS) {
     console.error(
       `[stop-hook] Circuit breaker tripped: ${MAX_CONSECUTIVE_BLOCKS} consecutive blocks without task progress in ${relativePlanPath}. Allowing exit.`
     );
-    clearCircuitBreakerState(cwd);
+    releasePlan(planInfo);
     process.exit(0);
   }
 
-  // Save updated state
-  try {
-    fs.writeFileSync(statePath, JSON.stringify(state, null, 2), 'utf8');
-  } catch (err) {}
+  saveBreaker(planInfo, breaker);
 
-  // Format next task preview
   const nextTask = taskAnalysis.incompleteTasks[0];
   const nextTaskPreview = nextTask ? `\n\nNext pending step:\n${nextTask.raw}` : '';
 

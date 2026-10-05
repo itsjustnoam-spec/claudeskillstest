@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Register / clear the plan this session is executing, so the Stop hook keeps
+# the session going until the plan and its final review are done.
+# Without a registered plan the Stop hook never blocks.
+#
+# Usage: plan-active start|done PLAN_FILE
+set -euo pipefail
+
+if [ $# -ne 2 ]; then
+  echo "usage: plan-active start|done PLAN_FILE" >&2
+  exit 2
+fi
+
+here=$(cd "$(dirname "$0")" && pwd)
+exec node "$here/../../../hooks/active-plan.js" "$1" "$2"
